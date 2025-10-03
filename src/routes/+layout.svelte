@@ -10,35 +10,6 @@
 
 {@render children?.()}
 
-<!-- <style>
-	/* Apply a dark background and light text globally */
-	:root{
-		--background-color: #0b0c10; /* very dark background */
-		--text-color: #e6eef8; /* light text for contrast */
-		--link-color: #7dd3fc; /* brighter link color on dark background */
-		--color-primary: #169976; /* primary button color */
-		--color-primary-dark: #077A7D; /* darker shade for hover */
-		--color-secondary: #FFFFFF; /* secondary color for light elements */
-		--color--foreground: #1f2833; /* slightly lighter than background for contrast */
-	}
-	:global(body) {
-		margin: 0;
-		background-color: var(--background-color);
-		color: #e6eef8; /* light text for contrast */
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-		font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-	}
-
-	:global(a) {
-		color: #7dd3fc; /* brighter link color on dark background */
-	}
-
-	/* Respect user's dark-mode preference if you want to later */
-	/* @media (prefers-color-scheme: light) {
-	} */
-</style> -->
-
 <style>
     :root {
         /* Backgrounds & Surfaces */
@@ -52,7 +23,7 @@
         --color-text-link: #7dd3fc;
         
         /* Brand Colors */
-        --color-brand-primary: #9FCC2E;
+        --color-brand-primary: #05F140;
         --color-brand-primary-hover: #8FB72A;
     }
     

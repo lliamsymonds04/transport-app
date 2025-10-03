@@ -2,6 +2,7 @@
 	import 'leaflet/dist/leaflet.css';
 	import { onMount } from 'svelte';
 	import type { Map as LeafletMap, LatLngTuple } from 'leaflet';
+    import { Ship, Bus, TrainFront } from 'lucide-svelte';
 
 	const Brisbane: LatLngTuple = [-27.4685, 153.0239];
 
@@ -37,13 +38,22 @@
 
 <div class="map-container">
 	<div bind:this={mapElement} class="map"></div>
+    
+    <div class="search-container {isTyping ? 'search-container-top' : 'search-container-center'}">
+        <div class="icons">
+            <Ship size="40" color="var(--color-brand-primary)" />
+            <Bus size="40" color="var(--color-brand-primary)" />
+            <TrainFront size="40" color="var(--color-brand-primary)" />
+        </div>
 
-	<div class="search-box {isTyping ? 'search-box-top' : 'search-box-center'}">
-		<form onsubmit={() => onSearchSubmit()} class="search-form">
-			<input type="text" placeholder="Search location..." oninput={handleSearchInput} />
-			<button type="submit" disabled={!isTyping}>Search</button>
-		</form>
-	</div>
+        <div class="search-box">
+            <form onsubmit={() => onSearchSubmit()} class="search-form">
+                <input type="text" placeholder="Search location..." oninput={handleSearchInput} />
+                <button type="submit" disabled={!isTyping}>Search</button>
+            </form>
+        </div>
+    </div>
+	
 </div>
 
 <style>
@@ -60,27 +70,36 @@
 	}
 
 	.search-box {
-		position: absolute;
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 1000;
 		background-color: var(--color-background-surface);
 		padding: 10px;
 		border-radius: 5px;
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-		transition:
+        width: 100%;
+	}
+
+    .search-container {
+        display: flex;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+
+        flex-direction: column;
+        align-items: center;
+        justify-items: center;
+        gap: 12px;
+        transition:
 			top 0.3s ease,
 			transform 0.3s ease,
 			width 0.3s ease;
-	}
+    }
 
-	.search-box-center {
+	.search-container-center {
 		top: 40%;
 		transform: translate(-50%, -50%);
 		width: 300px;
 	}
 
-	.search-box-top {
+	.search-container-top {
 		top: 10px;
 		transform: translateX(-50%);
 		width: 500px;
@@ -118,4 +137,11 @@
 		background-color: var(--color-brand-primary-hover);
 		transform: translateY(-1px);
 	}
+
+    .icons {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        width: 100%;
+    }
 </style>
