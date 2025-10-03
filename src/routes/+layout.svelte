@@ -27,9 +27,6 @@
 	}
 
 	/* Respect user's dark-mode preference if you want to later */
-	@media (prefers-color-scheme: light) {
-		:global(body) {
-			/* keep a neutral dark background even on light-pref browsers; change if you prefer */
-		}
-	}
+	/* @media (prefers-color-scheme: light) {
+	} */
 </style>
