@@ -2,17 +2,18 @@
 	import { Ship, Bus, TrainFront } from 'lucide-svelte';
 	import { env } from '$env/dynamic/public';
 	import type { LatLngTuple } from 'leaflet';
+	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 
 	const MapboxApiKey = env.PUBLIC_MAPBOX_TOKEN;
 
 	interface Props {
-		onSearchSubmit: (query: string) => void;
+		onSearchSubmit: (feature: MapboxFeature) => void;
 		proximity?: LatLngTuple;
 	}
 
 	let { onSearchSubmit, proximity }: Props = $props();
 	let query = $state('');
-	let suggestions = $state<string[]>([]);
+	let suggestions = $state<MapboxFeature[]>([]);
 	let isLoading = $state(false);
 	let isTyping = $derived(query.length > 0);
 	let showSuggestions = $derived(suggestions.length > 0);
@@ -41,7 +42,11 @@
 			const response = await fetch(url);
 
 			const data = await response.json();
-			suggestions = data.features.map((feature: any) => feature.properties.name);
+			suggestions = data.features.map((feature: any) => ({
+				id: feature.id,
+				place_name: feature.properties.name,
+				coordinates: feature.properties.coordinates,
+			}));
 		} catch (error) {
 			console.error('Error fetching suggestions:', error);
 			suggestions = [];
@@ -50,8 +55,8 @@
 		}
 	}
 
-	function selectSuggestion(suggestion: string) {
-		query = suggestion;
+	function selectSuggestion(suggestion: MapboxFeature) {
+		query = suggestion.place_name;
 		showSuggestions = false;
 		suggestions = [];
 		onSearchSubmit?.(suggestion);
@@ -134,7 +139,7 @@
 			<div class="suggestions">
 				{#each suggestions as suggestion, index}
 					<div class="suggestions-item" class:suggestion-item-selected={index === selectedIndex}>
-						{suggestion}
+						{suggestion.place_name}
 					</div>
 				{/each}
 			</div>

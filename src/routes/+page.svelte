@@ -3,6 +3,7 @@
 	import type { Map as LeafletMap, LatLngTuple } from 'leaflet';
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import MapView from '$lib/components/MapView.svelte';
+	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 
 	const Brisbane: LatLngTuple = [-27.4685, 153.0239];
 	let mapComponent: MapView;
@@ -14,9 +15,18 @@
 	}
 
 
-	function handleSearch(query: string) {
-		console.log('Search query:', query);
+	function handleSearch(mapboxFeature: MapboxFeature) {
+		// console.log('Search query:', query);
 		// Implement search functionality here
+
+		// zoom to the searched location
+		if (mapElement && mapboxFeature.coordinates) {
+			const coords: LatLngTuple = [mapboxFeature.coordinates.latitude, mapboxFeature.coordinates.longitude];
+			mapElement.setView(coords, 15);
+
+			// add a marker at the searched location
+			
+		}
 	}
 	
 </script>
