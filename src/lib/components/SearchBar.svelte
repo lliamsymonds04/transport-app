@@ -1,57 +1,55 @@
 <script lang="ts">
 	import { Ship, Bus, TrainFront } from 'lucide-svelte';
-  import { env } from '$env/dynamic/public';
+	import { env } from '$env/dynamic/public';
 	import type { LatLngTuple } from 'leaflet';
 
-  const MapboxApiKey = env.PUBLIC_MAPBOX_TOKEN;
-  const debounceTimeout = 300;
-
-  console.log('Mapbox API Key:', MapboxApiKey);
+	const MapboxApiKey = env.PUBLIC_MAPBOX_TOKEN;
 
 	interface Props {
 		onSearchSubmit: (query: string) => void;
-    proximity?: LatLngTuple;
+		proximity?: LatLngTuple;
 	}
 
 	let { onSearchSubmit, proximity }: Props = $props();
 	let query = $state('');
-  let suggestions = $state<string[]>([]);
-  let isLoading = $state(false);
+	let suggestions = $state<string[]>([]);
+	let isLoading = $state(false);
 	let isTyping = $derived(query.length > 0);
-  let showSuggestions = $derived(suggestions.length > 0);
-  let selectedIndex = $state(-1);
+	let showSuggestions = $derived(suggestions.length > 0);
+	let selectedIndex = $state(-1);
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
 	async function fetchSuggestions(searchQuery: string) {
-    if (searchQuery.length < 3) {
-      suggestions = [];
-      return;
-    }
+		if (searchQuery.length < 3) {
+			suggestions = [];
+			return;
+		}
 
-    try {
-      let url = `https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}`
-        + `&limit=5`
-        + `&access_token=${MapboxApiKey}`
-        + `types=place,address,poi`;
+		isLoading = true;
 
-      if (proximity) {
-        url += `&proximity=${proximity[1]},${proximity[0]}`;
-      }
+		try {
+			let url =
+				`https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}`
+				+ `&limit=5`
+				+ `&access_token=${MapboxApiKey}`
+				+ `&types=address%2Cplace`;
 
-      const response = await fetch(url);
+			if (proximity) {
+				url += `&proximity=${proximity[1]},${proximity[0]}`;
+			}
 
-      const data = await response.json();
-      // suggestions = data.features.map((feature: any) => feature.place_name);
-      suggestions = data.features
-      if (suggestions.length > 0) {
-        console.log('Suggestions:', $state.snapshot(suggestions));
-      }
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-      suggestions = [];
-    } finally {
-      isLoading = false;
-    }
-  };
+			const response = await fetch(url);
+
+			const data = await response.json();
+			suggestions = data.features.map((feature: any) => feature.properties.name);
+			
+		} catch (error) {
+			console.error('Error fetching suggestions:', error);
+			suggestions = [];
+		} finally {
+			isLoading = false;
+		}
+	}
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
@@ -60,17 +58,20 @@
 		}
 	}
 
-  function handleInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    query = input.value;
-    selectedIndex = -1;
+	function handleInput(event: Event) {
+		const input = event.target as HTMLInputElement;
+		query = input.value;
+		selectedIndex = -1;
 
-    clearTimeout(debounceTimeout);
-    setTimeout(() => {
-      isLoading = true;
-      fetchSuggestions(query);
-    }, debounceTimeout);
-  }
+		if (debounceTimer) {
+			clearTimeout(debounceTimer);
+		};
+
+		debounceTimer = setTimeout(() => {
+			isLoading = true;
+			fetchSuggestions(query);
+		}, 300);
+	}
 </script>
 
 <div
@@ -86,14 +87,24 @@
 
 	<div class="search-box">
 		<form onsubmit={handleSubmit} class="search-form">
-			<input 
-        type="text" 
-        placeholder="Search location..." 
-        oninput={handleInput}
-        bind:value={query} 
-      />
+			<input
+				type="text"
+				placeholder="Search location..."
+				oninput={handleInput}
+				bind:value={query}
+			/>
 			<button type="submit" disabled={!isTyping}>Search</button>
 		</form>
+
+		{#if showSuggestions}
+			<ul class="suggestions">
+				{#each suggestions as suggestion, index}
+					<li class:selected={index === selectedIndex}>
+						{suggestion}
+					</li>
+				{/each}
+			</ul>
+		{/if}
 	</div>
 </div>
 
@@ -171,5 +182,20 @@
 		justify-content: center;
 		gap: 24px;
 		width: 100%;
+	}
+
+	.suggestions {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		background: white;
+		border: 1px solid #ccc;
+		border-top: none;
+		border-radius: 0 0 4px 4px;
+		max-height: 300px;
+		overflow-y: auto;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		z-index: 1001;
 	}
 </style>
