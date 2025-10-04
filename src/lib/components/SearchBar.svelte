@@ -1,24 +1,77 @@
 <script lang="ts">
-    import { Ship, Bus, TrainFront } from 'lucide-svelte';
+	import { Ship, Bus, TrainFront } from 'lucide-svelte';
+  import { env } from '$env/dynamic/public';
 
-    interface Props {
-        onSearchSubmit: (query: string) => void;
+  const MapboxApiKey = env.PUBLIC_MAPBOX_TOKEN;
+  // const MapboxApiKey = import.meta.env.PUBLIC_MAPBOX_TOKEN;
+  const debounceTimeout = 300;
+
+  console.log('Mapbox API Key:', MapboxApiKey);
+
+	interface Props {
+		onSearchSubmit: (query: string) => void;
+	}
+
+	let { onSearchSubmit }: Props = $props();
+	let query = $state('');
+  let suggestions = $state<string[]>([]);
+  let isLoading = $state(false);
+	let isTyping = $derived(query.length > 0);
+  let showSuggestions = $derived(suggestions.length > 0);
+  let selectedIndex = $state(-1);
+
+	async function fetchSuggestions(searchQuery: string) {
+    if (searchQuery.length < 3) {
+      suggestions = [];
+      return;
     }
 
-    let { onSearchSubmit }: Props = $props();
-    let query = $state('');
-    let isTyping = $derived(query.length > 0);
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}`
+        + `&limit=5`
+        + `&access_token=${MapboxApiKey}`
+      )
 
-
-    function handleSubmit(event: Event) {
-        event.preventDefault();
-        if (query.trim()) {
-            onSearchSubmit?.(query);
-        }
+      const data = await response.json();
+      // suggestions = data.features.map((feature: any) => feature.place_name);
+      suggestions = data.features
+      if (suggestions.length > 0) {
+        console.log('Suggestions:', $inspect(suggestions));
+      }
+    } catch {
+      console.error('Error fetching suggestions');
+      suggestions = [];
+    } finally {
+      isLoading = false;
     }
+  };
+
+	function handleSubmit(event: Event) {
+		event.preventDefault();
+		if (query.trim()) {
+			onSearchSubmit?.(query);
+		}
+	}
+
+  function handleInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    query = input.value;
+    selectedIndex = -1;
+
+    clearTimeout(debounceTimeout);
+    setTimeout(() => {
+      isLoading = true;
+      fetchSuggestions(query);
+    }, debounceTimeout);
+  }
 </script>
 
-<div class="search-container" class:search-container-center={!isTyping} class:search-container-top={isTyping}>
+<div
+	class="search-container"
+	class:search-container-center={!isTyping}
+	class:search-container-top={isTyping}
+>
 	<div class="icons">
 		<Ship size="40" color="var(--color-brand-primary)" />
 		<Bus size="40" color="var(--color-brand-primary)" />
@@ -27,81 +80,90 @@
 
 	<div class="search-box">
 		<form onsubmit={handleSubmit} class="search-form">
-			<input type="text" placeholder="Search location..." bind:value={query} />
+			<input 
+        type="text" 
+        placeholder="Search location..." 
+        oninput={handleInput}
+        bind:value={query} 
+      />
 			<button type="submit" disabled={!isTyping}>Search</button>
 		</form>
 	</div>
 </div>
 
-
 <style>
-  .search-box {
-    background-color: var(--color-background-surface);
-    padding: 10px;
-    border-radius: 5px;
-    width: 100%;
-  }
+	.search-box {
+		background-color: var(--color-background-surface);
+		padding: 10px;
+		border-radius: 5px;
+		width: 100%;
+	}
 
-  .search-container {
-    display: flex;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    flex-direction: column;
-    align-items: center;
-    justify-items: center;
-    gap: 12px;
-    transition: top 0.3s ease, transform 0.3s ease, width 0.3s ease;
-  }
+	.search-container {
+		display: flex;
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 1000;
+		flex-direction: column;
+		align-items: center;
+		justify-items: center;
+		gap: 12px;
+		transition:
+			top 0.3s ease,
+			transform 0.3s ease,
+			width 0.3s ease;
+	}
 
-  .search-container-center {
-    top: 40%;
-    transform: translate(-50%, -50%);
-    width: 300px;
-  }
+	.search-container-center {
+		top: 40%;
+		transform: translate(-50%, -50%);
+		width: 300px;
+	}
 
-  .search-container-top {
-    top: 10px;
-    transform: translateX(-50%);
-    width: 500px;
-  }
+	.search-container-top {
+		top: 10px;
+		transform: translateX(-50%);
+		width: 500px;
+	}
 
-  .search-box .search-form {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+	.search-box .search-form {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
 
-  .search-box input {
-    flex: 1 1 auto;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-  }
+	.search-box input {
+		flex: 1 1 auto;
+		padding: 8px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		font-size: 16px;
+	}
 
-  .search-box button {
-    flex: 0 0 auto;
-    padding: 8px 12px;
-    margin-left: 8px;
-    border: none;
-    background-color: var(--color-brand-primary);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s, transform 0.2s;
-  }
+	.search-box button {
+		flex: 0 0 auto;
+		padding: 8px 12px;
+		margin-left: 8px;
+		border: none;
+		background-color: var(--color-brand-primary);
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 16px;
+		transition:
+			background-color 0.2s,
+			transform 0.2s;
+	}
 
-  .search-box button:hover {
-    background-color: var(--color-brand-primary-hover);
-    transform: translateY(-1px);
-  }
+	.search-box button:hover {
+		background-color: var(--color-brand-primary-hover);
+		transform: translateY(-1px);
+	}
 
-  .icons {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    width: 100%;
-  }
+	.icons {
+		display: flex;
+		justify-content: center;
+		gap: 24px;
+		width: 100%;
+	}
 </style>
