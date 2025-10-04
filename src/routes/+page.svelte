@@ -16,17 +16,14 @@
 
 
 	function handleSearch(mapboxFeature: MapboxFeature) {
-		// console.log('Search query:', query);
-		// Implement search functionality here
-
 		// zoom to the searched location
 		if (mapElement && mapboxFeature.coordinates) {
 			const coords: LatLngTuple = [mapboxFeature.coordinates.latitude, mapboxFeature.coordinates.longitude];
 			mapElement.setView(coords, 15);
 
 			// add a marker at the searched location
+			mapComponent.clearMarkers();
 			mapComponent.addMarker(coords[0], coords[1], mapboxFeature.place_name);
-			
 		}
 	}
 	
