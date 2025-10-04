@@ -18,8 +18,8 @@
         --color-background-input: #FFFFFF; /* For a light input field */
 
         /* Text & Links */
-        --color-text-body: #e6eef8;
-        --color-text-heading: #FFFFFF; /* Optionally brighter for titles */
+        --color-text-body: #0b0c10;
+        --color-text-heading: #0b0c10; /* Optionally brighter for titles */
         --color-text-link: #7dd3fc;
         
         /* Brand Colors */

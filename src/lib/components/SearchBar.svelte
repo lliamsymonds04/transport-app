@@ -17,7 +17,7 @@
 	let isTyping = $derived(query.length > 0);
 	let showSuggestions = $derived(suggestions.length > 0);
 	let selectedIndex = $state(-1);
-  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
 	async function fetchSuggestions(searchQuery: string) {
 		if (searchQuery.length < 3) {
@@ -29,10 +29,10 @@
 
 		try {
 			let url =
-				`https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}`
-				+ `&limit=5`
-				+ `&access_token=${MapboxApiKey}`
-				+ `&types=address%2Cplace`;
+				`https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}` +
+				`&limit=5` +
+				`&access_token=${MapboxApiKey}` +
+				`&types=address%2Cplace`;
 
 			if (proximity) {
 				url += `&proximity=${proximity[1]},${proximity[0]}`;
@@ -42,7 +42,6 @@
 
 			const data = await response.json();
 			suggestions = data.features.map((feature: any) => feature.properties.name);
-			
 		} catch (error) {
 			console.error('Error fetching suggestions:', error);
 			suggestions = [];
@@ -51,10 +50,21 @@
 		}
 	}
 
+	function selectSuggestion(suggestion: string) {
+		query = suggestion;
+		showSuggestions = false;
+		suggestions = [];
+		onSearchSubmit?.(suggestion);
+	}
+
 	function handleSubmit(event: Event) {
 		event.preventDefault();
 		if (query.trim()) {
-			onSearchSubmit?.(query);
+			if (suggestions.length > 0 && selectedIndex >= 0) {
+				selectSuggestion(suggestions[selectedIndex]);
+			} else if (suggestions.length > 0) {
+				selectSuggestion(suggestions[0]);
+			}
 		}
 	}
 
@@ -65,12 +75,34 @@
 
 		if (debounceTimer) {
 			clearTimeout(debounceTimer);
-		};
+		}
 
 		debounceTimer = setTimeout(() => {
 			isLoading = true;
 			fetchSuggestions(query);
 		}, 300);
+	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (!showSuggestions || suggestions.length === 0) return;
+
+		if (event.key === 'ArrowDown') {
+			event.preventDefault();
+			selectedIndex = (selectedIndex + 1) % suggestions.length;
+		} else if (event.key === 'ArrowUp') {
+			event.preventDefault();
+			selectedIndex = (selectedIndex - 1 + suggestions.length) % suggestions.length;
+		} else if (event.key === 'Escape') {
+			showSuggestions = false;
+			selectedIndex = -1;
+		}
+	}
+
+	function handleBlur() {
+		setTimeout(() => {
+			showSuggestions = false;
+			selectedIndex = -1;
+		}, 200);
 	}
 </script>
 
@@ -91,19 +123,21 @@
 				type="text"
 				placeholder="Search location..."
 				oninput={handleInput}
+				onkeydown={handleKeydown}
+				onblur={handleBlur}
 				bind:value={query}
 			/>
 			<button type="submit" disabled={!isTyping}>Search</button>
 		</form>
 
 		{#if showSuggestions}
-			<ul class="suggestions">
+			<div class="suggestions">
 				{#each suggestions as suggestion, index}
-					<li class:selected={index === selectedIndex}>
+					<div class="suggestions-item" class:suggestion-item-selected={index === selectedIndex}>
 						{suggestion}
-					</li>
+					</div>
 				{/each}
-			</ul>
+			</div>
 		{/if}
 	</div>
 </div>
@@ -184,6 +218,7 @@
 		width: 100%;
 	}
 
+	/* Suggestions Dropdown */
 	.suggestions {
 		position: absolute;
 		top: 100%;
@@ -196,6 +231,19 @@
 		max-height: 300px;
 		overflow-y: auto;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		z-index: 1001;
+		/* gap: 8px; */
+	}
+
+	.suggestions-item {
+		padding: 8px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+		color: var(--color-text-body);
+		border-radius: 0 0 4px 4px;
+	}
+
+	.suggestion-item-selected,
+	.suggestions-item:hover {
+		background-color: var(--color-brand-primary);
 	}
 </style>
