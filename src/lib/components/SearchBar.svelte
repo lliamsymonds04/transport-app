@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { Ship, Bus, TrainFront } from 'lucide-svelte';
   import { env } from '$env/dynamic/public';
+	import type { LatLngTuple } from 'leaflet';
 
   const MapboxApiKey = env.PUBLIC_MAPBOX_TOKEN;
-  // const MapboxApiKey = import.meta.env.PUBLIC_MAPBOX_TOKEN;
   const debounceTimeout = 300;
 
   console.log('Mapbox API Key:', MapboxApiKey);
 
 	interface Props {
 		onSearchSubmit: (query: string) => void;
+    proximity?: LatLngTuple;
 	}
 
-	let { onSearchSubmit }: Props = $props();
+	let { onSearchSubmit, proximity }: Props = $props();
 	let query = $state('');
   let suggestions = $state<string[]>([]);
   let isLoading = $state(false);
@@ -27,20 +28,25 @@
     }
 
     try {
-      const response = await fetch(
-        `https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}`
+      let url = `https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}`
         + `&limit=5`
         + `&access_token=${MapboxApiKey}`
-      )
+        + `types=place,address,poi`;
+
+      if (proximity) {
+        url += `&proximity=${proximity[1]},${proximity[0]}`;
+      }
+
+      const response = await fetch(url);
 
       const data = await response.json();
       // suggestions = data.features.map((feature: any) => feature.place_name);
       suggestions = data.features
       if (suggestions.length > 0) {
-        console.log('Suggestions:', $inspect(suggestions));
+        console.log('Suggestions:', $state.snapshot(suggestions));
       }
-    } catch {
-      console.error('Error fetching suggestions');
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
       suggestions = [];
     } finally {
       isLoading = false;

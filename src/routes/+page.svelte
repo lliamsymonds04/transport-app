@@ -24,7 +24,7 @@
 <div class="map-container">
 	<MapView bind:this={mapComponent} onMapReady={handleMapReady} />
 
-	<SearchBar onSearchSubmit={handleSearch} />
+	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} />
 
 </div>
 
