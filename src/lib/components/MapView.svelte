@@ -11,11 +11,13 @@
 
 	let mapElement: HTMLElement;
 	let map: LeafletMap;
+	let L: typeof import('leaflet');
+	let markers: L.Marker[] = [];
 
     let { initialCenter = [0,0], initialZoom = 15, onMapReady }: Props = $props();
 
 	onMount(async () => {
-		const L = await import('leaflet');
+		L = await import('leaflet');
 
 		if (mapElement) {
 			map = L.map(mapElement).setView(initialCenter, initialZoom);
@@ -38,6 +40,27 @@
     export function getMap(): LeafletMap | undefined {
         return map;
     }
+
+	export function addMarker(lat: number, lng: number, popupText?: string) {
+		if (map) {
+			const marker = L.marker([lat, lng]).addTo(map);
+			if (popupText) {
+				marker.bindPopup(popupText);
+			}
+			markers.push(marker);
+			return marker;
+		}
+	}
+
+	export function clearMarkers() {
+		markers.forEach(marker => map.removeLayer(marker));
+		markers = [];
+	}
+
+	export function removeMarker(marker: L.Marker) {
+		map.removeLayer(marker);
+		markers = markers.filter(m => m !== marker);
+	}
 
     onDestroy(() => {
         map?.remove();

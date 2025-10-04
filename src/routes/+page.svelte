@@ -25,6 +25,7 @@
 			mapElement.setView(coords, 15);
 
 			// add a marker at the searched location
+			mapComponent.addMarker(coords[0], coords[1], mapboxFeature.place_name);
 			
 		}
 	}
