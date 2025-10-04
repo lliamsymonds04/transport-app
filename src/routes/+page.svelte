@@ -6,7 +6,7 @@
 
 	const Brisbane: LatLngTuple = [-27.4685, 153.0239];
 	let mapComponent: MapView;
-	let mapElement: LeafletMap;
+	let mapElement = $state<LeafletMap | null>(null);
 
 	function handleMapReady(map: LeafletMap) {
 		mapElement = map;
