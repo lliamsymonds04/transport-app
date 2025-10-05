@@ -42,6 +42,7 @@
 			const response = await fetch(url);
 
 			const data = await response.json();
+			console.log('Mapbox API response:', data);
 			suggestions = data.features.map((feature: any) => ({
 				id: feature.id,
 				place_name: feature.properties.name,
