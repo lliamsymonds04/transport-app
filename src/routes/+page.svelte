@@ -14,7 +14,6 @@
 		mapComponent.setView(Brisbane, 15);
 	}
 
-
 	function handleSearch(mapboxFeature: MapboxFeature) {
 		// zoom to the searched location
 		if (mapElement && mapboxFeature.coordinates) {
