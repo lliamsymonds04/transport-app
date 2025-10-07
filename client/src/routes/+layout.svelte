@@ -14,17 +14,19 @@
     :root {
         /* Backgrounds & Surfaces */
         --color-background-page: #0b0c10;
-        --color-background-surface: #F5F5F5; /* For cards, sections, etc. */
-        --color-background-input: #FFFFFF; /* For a light input field */
+        --color-background-surface: #181a1b; /* For cards, sections, etc. */
+        --color-background-input: #131516; /* For a light input field */
+        --color-border: #3e4446; /* Subtle borders */
 
         /* Text & Links */
-        --color-text-body: #0b0c10;
-        --color-text-heading: #0b0c10; /* Optionally brighter for titles */
+        --color-text-body: #e8e6e3;
+        --color-text-heading: #e8e6e3; /* Optionally brighter for titles */
         --color-text-link: #7dd3fc;
         
         /* Brand Colors */
         --color-brand-primary: #05F140;
-        --color-brand-primary-hover: #8FB72A;
+        --color-brand-primary-hover: #07ce39;
+        --color-brand-secondary: #e8e6e3;
     }
     
     :global(body) {

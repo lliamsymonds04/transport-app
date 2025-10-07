@@ -118,9 +118,9 @@
 	class:search-container-top={isTyping}
 >
 	<div class="icons">
-		<Ship size="40" color="var(--color-brand-primary)" />
-		<Bus size="40" color="var(--color-brand-primary)" />
-		<TrainFront size="40" color="var(--color-brand-primary)" />
+		<Ship size="40" color="var(--color-brand-secondary)" />
+		<Bus size="40" color="var(--color-brand-secondary)" />
+		<TrainFront size="40" color="var(--color-brand-secondary)" />
 	</div>
 
 	<div class="search-box">
@@ -193,9 +193,10 @@
 	.search-box input {
 		flex: 1 1 auto;
 		padding: 8px;
-		border: 1px solid #ccc;
+		border: 1px solid var(--color-border);
 		border-radius: 4px;
 		font-size: 16px;
+		color: var(--color-text-body);
 	}
 
 	.search-box button {
@@ -230,14 +231,13 @@
 		top: 100%;
 		left: 0;
 		right: 0;
-		background: white;
-		border: 1px solid #ccc;
+		background: var(--color-background-surface);
+		border: 1px solid var(--color-border);
 		border-top: none;
 		border-radius: 0 0 4px 4px;
 		max-height: 300px;
 		overflow-y: auto;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		/* gap: 8px; */
 	}
 
 	.suggestions-item {
