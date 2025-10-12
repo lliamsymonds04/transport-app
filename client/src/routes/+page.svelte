@@ -35,6 +35,12 @@
 	<MapView bind:this={mapComponent} onMapReady={handleMapReady} />
 
 	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} {searchValue} />
+
+	{#if searchValue}
+		<div class="search-result">
+			<p>Showing results for: <strong>{searchValue}</strong></p>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -42,5 +48,11 @@
 		position: relative;
 		height: 100vh;
 		width: 100%;
+	}
+	.search-result {
+		position: absolute;
+    width: 200px;
+		top: 500px;
+		left: 50%;
 	}
 </style>

@@ -8,8 +8,8 @@
 
 	interface Props {
 		onSearchSubmit: (feature: MapboxFeature) => void;
+		searchValue: string;
 		proximity?: LatLngTuple;
-		searchValue?: string;
 	}
 
 	let { onSearchSubmit, proximity, searchValue }: Props = $props();
