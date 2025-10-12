@@ -9,9 +9,10 @@
 	interface Props {
 		onSearchSubmit: (feature: MapboxFeature) => void;
 		proximity?: LatLngTuple;
+		searchValue?: string;
 	}
 
-	let { onSearchSubmit, proximity }: Props = $props();
+	let { onSearchSubmit, proximity, searchValue }: Props = $props();
 	let query = $state('');
 	let suggestions = $state<MapboxFeature[]>([]);
 	let isLoading = $state(false);
@@ -46,7 +47,7 @@
 			suggestions = data.features.map((feature: any) => ({
 				id: feature.id,
 				place_name: feature.properties.name,
-				coordinates: feature.properties.coordinates,
+				coordinates: feature.properties.coordinates
 			}));
 		} catch (error) {
 			console.error('Error fetching suggestions:', error);
@@ -60,6 +61,7 @@
 		query = suggestion.place_name;
 		showSuggestions = false;
 		suggestions = [];
+		searchValue = query;
 		onSearchSubmit?.(suggestion);
 	}
 
@@ -78,6 +80,7 @@
 		const input = event.target as HTMLInputElement;
 		query = input.value;
 		selectedIndex = -1;
+		searchValue = ''; // Clear search value on input
 
 		if (debounceTimer) {
 			clearTimeout(debounceTimer);

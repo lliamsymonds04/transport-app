@@ -8,6 +8,7 @@
 	const Brisbane: LatLngTuple = [-27.4685, 153.0239];
 	let mapComponent: MapView;
 	let mapElement = $state<LeafletMap | null>(null);
+	let searchValue = $state('');
 
 	function handleMapReady(map: LeafletMap) {
 		mapElement = map;
@@ -33,7 +34,7 @@
 <div class="map-container">
 	<MapView bind:this={mapComponent} onMapReady={handleMapReady} />
 
-	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} />
+	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} {searchValue} />
 </div>
 
 <style>
