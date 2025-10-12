@@ -8,7 +8,7 @@
 	const Brisbane: LatLngTuple = [-27.4685, 153.0239];
 	let mapComponent: MapView;
 	let mapElement = $state<LeafletMap | null>(null);
-	let searchValue = $state('');
+	let searchValue: MapboxFeature | null = $state(null);
 
 	function handleMapReady(map: LeafletMap) {
 		mapElement = map;
@@ -34,11 +34,11 @@
 <div class="map-container">
 	<MapView bind:this={mapComponent} onMapReady={handleMapReady} />
 
-	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} {searchValue} />
+	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} bind:searchValue />
 
 	{#if searchValue}
-		<div class="search-result">
-			<p>Showing results for: <strong>{searchValue}</strong></p>
+		<div class="absolute bg-blue-600 top-1/2 left-1/2 z-50">
+			<p class="text-2xl">Showing results for: <strong>{searchValue.place_name}</strong></p>
 		</div>
 	{/if}
 </div>
@@ -48,11 +48,5 @@
 		position: relative;
 		height: 100vh;
 		width: 100%;
-	}
-	.search-result {
-		position: absolute;
-    width: 200px;
-		top: 500px;
-		left: 50%;
 	}
 </style>

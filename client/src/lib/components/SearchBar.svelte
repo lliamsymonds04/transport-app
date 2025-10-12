@@ -8,11 +8,11 @@
 
 	interface Props {
 		onSearchSubmit: (feature: MapboxFeature) => void;
-		searchValue: string;
+		searchValue: MapboxFeature | null;
 		proximity?: LatLngTuple;
 	}
 
-	let { onSearchSubmit, proximity, searchValue }: Props = $props();
+	let { onSearchSubmit, proximity, searchValue = $bindable() }: Props = $props();
 	let query = $state('');
 	let suggestions = $state<MapboxFeature[]>([]);
 	let isLoading = $state(false);
@@ -43,7 +43,6 @@
 			const response = await fetch(url);
 
 			const data = await response.json();
-			console.log('Mapbox API response:', data);
 			suggestions = data.features.map((feature: any) => ({
 				id: feature.id,
 				place_name: feature.properties.name,
@@ -61,7 +60,7 @@
 		query = suggestion.place_name;
 		showSuggestions = false;
 		suggestions = [];
-		searchValue = query;
+		searchValue = suggestion;
 		onSearchSubmit?.(suggestion);
 	}
 
@@ -80,10 +79,15 @@
 		const input = event.target as HTMLInputElement;
 		query = input.value;
 		selectedIndex = -1;
-		searchValue = ''; // Clear search value on input
 
 		if (debounceTimer) {
 			clearTimeout(debounceTimer);
+		}
+
+		// clear searchValue if query is cleared or changed
+		if (query.length == 0 || (searchValue && searchValue?.place_name != query)) {
+			searchValue = null;
+			return;
 		}
 
 		debounceTimer = setTimeout(() => {
