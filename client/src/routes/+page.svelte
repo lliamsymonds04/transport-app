@@ -17,7 +17,10 @@
 	function handleSearch(mapboxFeature: MapboxFeature) {
 		// zoom to the searched location
 		if (mapElement && mapboxFeature.coordinates) {
-			const coords: LatLngTuple = [mapboxFeature.coordinates.latitude, mapboxFeature.coordinates.longitude];
+			const coords: LatLngTuple = [
+				mapboxFeature.coordinates.latitude,
+				mapboxFeature.coordinates.longitude
+			];
 			mapElement.setView(coords, 15);
 
 			// add a marker at the searched location
@@ -25,14 +28,12 @@
 			mapComponent.addMarker(coords[0], coords[1], mapboxFeature.place_name);
 		}
 	}
-	
 </script>
 
 <div class="map-container">
 	<MapView bind:this={mapComponent} onMapReady={handleMapReady} />
 
 	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} />
-
 </div>
 
 <style>
