@@ -4,6 +4,7 @@
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import MapView from '$lib/components/MapView.svelte';
 	import TravelBar from '$lib/components/TravelBar.svelte';
+	import { getUserLocation } from '$lib/utils/getUserLocation';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 
 	const Brisbane: LatLngTuple = [-27.4685, 153.0239];
@@ -11,9 +12,25 @@
 	let mapElement = $state<LeafletMap | null>(null);
 	let searchValue: MapboxFeature | null = $state(null);
 
+	async function loadUserLocation() {
+		try {
+			const userLocation = await getUserLocation();
+			console.log('User location:', userLocation);
+			if (userLocation) {
+				const coords: LatLngTuple = [userLocation.coords.latitude, userLocation.coords.longitude];
+				mapComponent.setView(coords, 15);
+				mapComponent.addMarker(coords[0], coords[1], 'You are here');
+			}
+		} catch (error) {
+			console.error('Error getting user location:', error);
+		}
+	}
+
 	function handleMapReady(map: LeafletMap) {
 		mapElement = map;
 		mapComponent.setView(Brisbane, 15);
+
+		loadUserLocation();
 	}
 
 	function handleSearch(mapboxFeature: MapboxFeature) {
