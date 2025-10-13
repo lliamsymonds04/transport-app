@@ -124,12 +124,12 @@
 	class:search-container-top={isTyping}
 >
 	<div class="icons">
-		<Ship size="40" class="text-secondary" />
-		<Bus size="40" class="text-secondary" />
-		<TrainFront size="40" class="text-secondary" />
+		<Ship size="40" class="text-off-white" />
+		<Bus size="40" class="text-off-white" />
+		<TrainFront size="40" class="text-off-white" />
 	</div>
 
-	<div class="relative bg-[var(--color-background-surface)] p-2 rounded-md w-full">
+	<div class="relative bg-surface p-2 rounded-md w-full">
 		<form onsubmit={handleSubmit} class="flex flex-row gap-4 items-center">
 			<input
 				class="flex-1 bg-input border border-border
@@ -144,7 +144,7 @@
 			/>
 			<button
 				type="submit"
-				class="bg-primary text-body px-4 py-2 rounded-md
+				class="bg-primary text-off-white px-4 py-2 rounded-md font-semibold
           hover:bg-primary-hover transition disabled:opacity-80 disabled:cursor-not-allowed"
 				disabled={!isTyping}>Search</button
 			>
