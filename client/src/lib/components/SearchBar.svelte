@@ -124,17 +124,17 @@
 	class:search-container-top={isTyping}
 >
 	<div class="icons">
-		<Ship size="40" color="var(--color-brand-secondary)" />
-		<Bus size="40" color="var(--color-brand-secondary)" />
-		<TrainFront size="40" color="var(--color-brand-secondary)" />
+		<Ship size="40" class="text-secondary" />
+		<Bus size="40" class="text-secondary" />
+		<TrainFront size="40" class="text-secondary" />
 	</div>
 
 	<div class="relative bg-[var(--color-background-surface)] p-2 rounded-md w-full">
-		<form onsubmit={handleSubmit} class="flex flex-row gap-2 items-center">
+		<form onsubmit={handleSubmit} class="flex flex-row gap-4 items-center">
 			<input
-				class="flex-1 bg-[var(--color-background-input)] border border-[var(--color-border)]
-          text-[var(--color-text-body)] focus:outline-none focus:ring-2
-          focus:ring-[var(--color-brand-primary)] focus:border-transparent px-4 py-2 rounded-md w-full"
+				class="flex-1 bg-input border border-border
+        text-body focus:outline-none focus:ring-2
+          focus:ring-primary focus:border-transparent px-4 py-2 rounded-md w-full"
 				type="text"
 				placeholder="Search location..."
 				oninput={handleInput}
@@ -144,24 +144,24 @@
 			/>
 			<button
 				type="submit"
-				class="bg-[var(--color-brand-primary)] text-[var(--color-background-page)] px-4 py-2 rounded-md
-          hover:bg-[var(--color-brand-primary-hover)] transition disabled:opacity-80 disabled:cursor-not-allowed"
+				class="bg-primary text-body px-4 py-2 rounded-md
+          hover:bg-primary-hover transition disabled:opacity-80 disabled:cursor-not-allowed"
 				disabled={!isTyping}>Search</button
 			>
 		</form>
 
 		{#if showSuggestions}
 			<div
-				class="absolute top-full bg-[var(--color-background-surface)] w-full mt-1
-        rounded-md shadow-lg max-h-300 left-0 border border-[var(--color-border)]"
+				class="absolute top-full bg-surface w-full mt-1
+        rounded-md shadow-lg max-h-300 left-0 border border-border"
 			>
 				{#each suggestions as suggestion, index}
 					<button
 						type="button"
 						class="w-full text-left px-3 py-2 cursor-pointer transition-colors border-0 {index ===
 						selectedIndex
-							? 'bg-[var(--color-brand-primary)] text-white'
-							: 'bg-transparent text-[var(--color-text-body)] hover:bg-[var(--color-background-input)]'}"
+							? 'bg-primary text-white'
+							: 'bg-transparent text-body hover:bg-input'}"
 						onclick={() => selectSuggestion(suggestion)}
 					>
 						{suggestion.place_name}
@@ -199,34 +199,6 @@
 		top: 10px;
 		transform: translateX(-50%);
 		width: 500px;
-	}
-
-	.search-box input {
-		flex: 1 1 auto;
-		padding: 8px;
-		border: 1px solid var(--color-border);
-		border-radius: 4px;
-		font-size: 16px;
-		color: var(--color-text-body);
-	}
-
-	.search-box button {
-		flex: 0 0 auto;
-		padding: 8px 12px;
-		margin-left: 8px;
-		border: none;
-		background-color: var(--color-brand-primary);
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 16px;
-		transition:
-			background-color 0.2s,
-			transform 0.2s;
-	}
-
-	.search-box button:hover {
-		background-color: var(--color-brand-primary-hover);
-		transform: translateY(-1px);
 	}
 
 	.icons {

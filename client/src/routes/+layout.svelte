@@ -46,19 +46,4 @@
 	:global(a) {
 		color: var(--color-text-link);
 	}
-
-	:global(.card),
-	:global(.section) {
-		background-color: var(--color-background-surface);
-		padding: 20px;
-		border-radius: 8px;
-	}
-
-	:global(input[type='text']),
-	:global(.input-field) {
-		background-color: var(--color-background-input);
-		color: var(--color-background-page); /* Dark text on light input */
-		border: 1px solid var(--color-brand-primary); /* Optional subtle border */
-		padding: 10px;
-	}
 </style>
