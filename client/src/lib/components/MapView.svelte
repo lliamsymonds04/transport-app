@@ -74,7 +74,6 @@
 		height: 100%;
 		width: 100%;
 		background-color: var(--color--foreground);
-		z-index: 10;
+		z-index: 0;
 	}
 </style>
-

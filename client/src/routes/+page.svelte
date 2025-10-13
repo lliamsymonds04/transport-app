@@ -38,7 +38,7 @@
 	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} bind:searchValue />
 
 	{#if searchValue}
-		<TravelBar />
+		<TravelBar destination={searchValue} />
 	{/if}
 </div>
 
