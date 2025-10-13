@@ -2,12 +2,13 @@ import type { Coordinates } from "./coordinates";
 
 export interface MapboxFeature {
   id: string;
-  place_name: string;
+  name: string;
   coordinates: Coordinates;
 }
 
-export interface Suggestion {
-  mapbox_id: string;
+export interface MapboxSuggestion {
+  id: string;
   name: string;
   address?: string;
+  distance?: number;
 }

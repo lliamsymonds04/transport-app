@@ -3,7 +3,7 @@
 	import { env } from '$env/dynamic/public';
 	import { v4 as uuidv4 } from 'uuid';
 	import type { LatLngTuple } from 'leaflet';
-	import type { MapboxFeature } from '$lib/types/mapboxFeature';
+	import type { MapboxFeature, MapboxSuggestion } from '$lib/types/mapboxFeature';
 
 	const MapboxApiKey = env.PUBLIC_MAPBOX_TOKEN;
 
@@ -15,7 +15,7 @@
 
 	let { onSearchSubmit, proximity, searchValue = $bindable() }: Props = $props();
 	let query = $state('');
-	let suggestions = $state<MapboxFeature[]>([]);
+	let suggestions = $state<MapboxSuggestion[]>([]);
 	let isLoading = $state(false);
 	let isTyping = $derived(query.length > 0);
 	let showSuggestions = $derived(suggestions.length > 0);
@@ -33,15 +33,8 @@
 		isLoading = true;
 
 		try {
-			//https://api.mapbox.com/search/searchbox/v1/suggest?q=uq+cen&session_token=09c41b73-77f1-4391-899d-c1407660d96a&proximity=-73.990593%2C40.740121&country=au&types=address%2Cpoi&access_token=YOUR_MAPBOX_ACCESS_TOKEN
-			// let url =
-			// 	`https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}` +
-			// 	`&limit=5` +
-			// 	`&access_token=${MapboxApiKey}` +
-			// 	`&country=au` +
-			// 	`&types=address%2Cplace`;
 			let url =
-				'https://api.mapbox.com/search/searchbox/v1/suggest?q=${encodeURIComponent(searchQuery)}' +
+				`https://api.mapbox.com/search/searchbox/v1/suggest?q=${encodeURIComponent(searchQuery)}` +
 				`&session_token=${sessionToken}` +
 				`&access_token=${MapboxApiKey}` +
 				`&limit=5` +
@@ -53,12 +46,15 @@
 			}
 
 			const response = await fetch(url);
+			console.log('Mapbox suggestions response:', response);
 
 			const data = await response.json();
-			suggestions = data.features.map((feature: any) => ({
-				id: feature.id,
-				place_name: feature.properties.name,
-				coordinates: feature.properties.coordinates
+			console.log('Mapbox suggestions data:', data);
+			suggestions = data.suggestions.map((suggestion: any) => ({
+				id: suggestion.mapbox_id,
+				name: suggestion.name,
+				address: suggestion.address,
+				distance: suggestion.distance
 			}));
 		} catch (error) {
 			console.error('Error fetching suggestions:', error);
@@ -68,12 +64,43 @@
 		}
 	}
 
-	function selectSuggestion(suggestion: MapboxFeature) {
-		query = suggestion.place_name;
+	async function getFeatureDetails(suggestion: MapboxSuggestion): Promise<MapboxFeature> {
+		// Fetch detailed feature information based on the suggestion
+		const url =
+			`https://api.mapbox.com/search/searchbox/v1/retrieve/${suggestion.id}` +
+			`?session_token=${sessionToken}` +
+			`&access_token=${MapboxApiKey}`;
+		console.log('Fetching feature details from URL:', url);
+		const response = await fetch(url);
+		const data = await response.json();
+		console.log('Mapbox feature details data:', data);
+		if (data.features && data.features.length > 0) {
+			// return data.features[0].properties as MapboxFeature;
+			const feature = data.features[0];
+			return {
+				id: suggestion.id,
+				name: suggestion.name,
+				coordinates: feature.geometry.coordinates
+			};
+		} else {
+			throw new Error('No feature details found');
+		}
+	}
+
+	async function selectSuggestion(suggestion: MapboxSuggestion) {
+		query = suggestion.name;
 		showSuggestions = false;
 		suggestions = [];
-		searchValue = suggestion;
-		onSearchSubmit?.(suggestion);
+
+		try {
+			const feature = await getFeatureDetails(suggestion);
+			console.log('Selected feature details:', feature);
+			searchValue = feature;
+
+			onSearchSubmit(feature);
+		} catch (error) {
+			console.error('Error fetching feature details:', error);
+		}
 	}
 
 	function handleSubmit(event: Event) {
@@ -97,7 +124,7 @@
 		}
 
 		// clear searchValue if query is cleared or changed
-		if (query.length == 0 || (searchValue && searchValue?.place_name != query)) {
+		if (query.length == 0 || (searchValue && searchValue?.name != query)) {
 			searchValue = null;
 		}
 
@@ -180,7 +207,7 @@
 							: 'bg-transparent text-body hover:bg-input'}"
 						onclick={() => selectSuggestion(suggestion)}
 					>
-						{suggestion.place_name}
+						{suggestion.name}
 					</button>
 				{/each}
 			</div>

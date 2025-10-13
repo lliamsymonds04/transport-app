@@ -27,7 +27,7 @@
 
 			// add a marker at the searched location
 			mapComponent.clearMarkers();
-			mapComponent.addMarker(coords[0], coords[1], mapboxFeature.place_name);
+			mapComponent.addMarker(coords[0], coords[1], mapboxFeature.name);
 		}
 	}
 </script>
