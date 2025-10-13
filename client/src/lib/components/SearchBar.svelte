@@ -34,6 +34,7 @@
 				`https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}` +
 				`&limit=5` +
 				`&access_token=${MapboxApiKey}` +
+				`&country=au` +
 				`&types=address%2Cplace`;
 
 			if (proximity) {
