@@ -3,6 +3,7 @@
 	import type { Map as LeafletMap, LatLngTuple } from 'leaflet';
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import MapView from '$lib/components/MapView.svelte';
+	import TravelBar from '$lib/components/TravelBar.svelte';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 
 	const Brisbane: LatLngTuple = [-27.4685, 153.0239];
@@ -37,9 +38,7 @@
 	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} bind:searchValue />
 
 	{#if searchValue}
-		<div class="absolute bg-blue-600 top-1/2 left-1/2 z-50 -translate-x-1/2 rounded-sm">
-			<p class="text-2xl">Showing results for: <strong>{searchValue.place_name}</strong></p>
-		</div>
+		<TravelBar />
 	{/if}
 </div>
 
