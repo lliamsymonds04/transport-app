@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Ship, Bus, TrainFront } from 'lucide-svelte';
 	import { env } from '$env/dynamic/public';
+	import { v4 as uuidv4 } from 'uuid';
 	import type { LatLngTuple } from 'leaflet';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 
@@ -21,6 +22,8 @@
 	let selectedIndex = $state(-1);
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
+	let sessionToken = uuidv4();
+
 	async function fetchSuggestions(searchQuery: string) {
 		if (searchQuery.length < 3) {
 			suggestions = [];
@@ -30,12 +33,20 @@
 		isLoading = true;
 
 		try {
+			//https://api.mapbox.com/search/searchbox/v1/suggest?q=uq+cen&session_token=09c41b73-77f1-4391-899d-c1407660d96a&proximity=-73.990593%2C40.740121&country=au&types=address%2Cpoi&access_token=YOUR_MAPBOX_ACCESS_TOKEN
+			// let url =
+			// 	`https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}` +
+			// 	`&limit=5` +
+			// 	`&access_token=${MapboxApiKey}` +
+			// 	`&country=au` +
+			// 	`&types=address%2Cplace`;
 			let url =
-				`https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(searchQuery)}` +
-				`&limit=5` +
+				'https://api.mapbox.com/search/searchbox/v1/suggest?q=${encodeURIComponent(searchQuery)}' +
+				`&session_token=${sessionToken}` +
 				`&access_token=${MapboxApiKey}` +
+				`&limit=5` +
 				`&country=au` +
-				`&types=address%2Cplace`;
+				`&types=address%2Cpoi`;
 
 			if (proximity) {
 				url += `&proximity=${proximity[1]},${proximity[0]}`;
