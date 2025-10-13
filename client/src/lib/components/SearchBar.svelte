@@ -90,7 +90,6 @@
 		}
 
 		debounceTimer = setTimeout(() => {
-			isLoading = true;
 			fetchSuggestions(query);
 		}, 300);
 	}
@@ -114,6 +113,7 @@
 		setTimeout(() => {
 			showSuggestions = false;
 			selectedIndex = -1;
+			isLoading = false;
 		}, 200);
 	}
 </script>
@@ -150,11 +150,15 @@
 			>
 		</form>
 
-		{#if showSuggestions}
+		{#if showSuggestions || isLoading}
 			<div
 				class="absolute top-full bg-surface w-full mt-1
         rounded-md shadow-lg max-h-300 left-0 border border-border"
 			>
+				{#if isLoading}
+					<p class="text-body px-3 py-2 font-semibold">Loading...</p>
+				{/if}
+
 				{#each suggestions as suggestion, index}
 					<button
 						type="button"
