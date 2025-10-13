@@ -46,10 +46,8 @@
 			}
 
 			const response = await fetch(url);
-			console.log('Mapbox suggestions response:', response);
 
 			const data = await response.json();
-			console.log('Mapbox suggestions data:', data);
 			suggestions = data.suggestions.map((suggestion: any) => ({
 				id: suggestion.mapbox_id,
 				name: suggestion.name,
@@ -70,17 +68,16 @@
 			`https://api.mapbox.com/search/searchbox/v1/retrieve/${suggestion.id}` +
 			`?session_token=${sessionToken}` +
 			`&access_token=${MapboxApiKey}`;
-		console.log('Fetching feature details from URL:', url);
+
 		const response = await fetch(url);
 		const data = await response.json();
-		console.log('Mapbox feature details data:', data);
+
 		if (data.features && data.features.length > 0) {
-			// return data.features[0].properties as MapboxFeature;
 			const feature = data.features[0];
 			return {
 				id: suggestion.id,
 				name: suggestion.name,
-				coordinates: feature.geometry.coordinates
+				coordinates: feature.properties.coordinates
 			};
 		} else {
 			throw new Error('No feature details found');
@@ -94,7 +91,6 @@
 
 		try {
 			const feature = await getFeatureDetails(suggestion);
-			console.log('Selected feature details:', feature);
 			searchValue = feature;
 
 			onSearchSubmit(feature);
