@@ -2,6 +2,7 @@
 	import { Ship, Bus, TrainFront } from 'lucide-svelte';
 	import { env } from '$env/dynamic/public';
 	import { v4 as uuidv4 } from 'uuid';
+	import { metersToKilometers } from '$lib/utils/metersToKilometers';
 	import type { LatLngTuple } from 'leaflet';
 	import type { MapboxFeature, MapboxSuggestion } from '$lib/types/mapboxFeature';
 
@@ -197,13 +198,18 @@
 				{#each suggestions as suggestion, index}
 					<button
 						type="button"
-						class="w-full text-left px-3 py-2 cursor-pointer transition-colors border-0 {index ===
+						class="w-full flex flex-row items-center justify-between text-left px-3 py-2 cursor-pointer transition-colors border-0 {index ===
 						selectedIndex
 							? 'bg-primary text-white'
 							: 'bg-transparent text-body hover:bg-input'}"
 						onclick={() => selectSuggestion(suggestion)}
 					>
-						{suggestion.name}
+						<span>{suggestion.name}</span>
+						{#if suggestion.distance}
+							<span class="text-sm text-muted block">
+								{metersToKilometers(suggestion.distance)} km</span
+							>
+						{/if}
 					</button>
 				{/each}
 			</div>
