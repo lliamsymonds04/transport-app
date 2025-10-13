@@ -37,7 +37,7 @@
 	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} bind:searchValue />
 
 	{#if searchValue}
-		<div class="absolute bg-blue-600 top-1/2 left-1/2 z-50">
+		<div class="absolute bg-blue-600 top-1/2 left-1/2 z-50 -translate-x-1/2 rounded-sm">
 			<p class="text-2xl">Showing results for: <strong>{searchValue.place_name}</strong></p>
 		</div>
 	{/if}

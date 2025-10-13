@@ -47,21 +47,6 @@
 		color: var(--color-text-link);
 	}
 
-	:global(button.primary),
-	:global(.btn-primary) {
-		background-color: var(--color-brand-primary);
-		color: var(--color-ui-white); /* White text on the dark button */
-		border: none;
-		padding: 10px 15px;
-		cursor: pointer;
-		transition: background-color 0.2s;
-	}
-
-	:global(button.primary:hover),
-	:global(.btn-primary:hover) {
-		background-color: var(--color-brand-primary-hover);
-	}
-
 	:global(.card),
 	:global(.section) {
 		background-color: var(--color-background-surface);
@@ -77,4 +62,3 @@
 		padding: 10px;
 	}
 </style>
-

@@ -87,7 +87,6 @@
 		// clear searchValue if query is cleared or changed
 		if (query.length == 0 || (searchValue && searchValue?.place_name != query)) {
 			searchValue = null;
-			return;
 		}
 
 		debounceTimer = setTimeout(() => {
@@ -130,9 +129,12 @@
 		<TrainFront size="40" color="var(--color-brand-secondary)" />
 	</div>
 
-	<div class="search-box">
-		<form onsubmit={handleSubmit} class="search-form">
+	<div class="relative bg-[var(--color-background-surface)] p-2 rounded-md w-full">
+		<form onsubmit={handleSubmit} class="flex flex-row gap-2 items-center">
 			<input
+				class="flex-1 bg-[var(--color-background-input)] border border-[var(--color-border)]
+          text-[var(--color-text-body)] focus:outline-none focus:ring-2
+          focus:ring-[var(--color-brand-primary)] focus:border-transparent px-4 py-2 rounded-md w-full"
 				type="text"
 				placeholder="Search location..."
 				oninput={handleInput}
@@ -140,15 +142,30 @@
 				onblur={handleBlur}
 				bind:value={query}
 			/>
-			<button type="submit" disabled={!isTyping}>Search</button>
+			<button
+				type="submit"
+				class="bg-[var(--color-brand-primary)] text-[var(--color-background-page)] px-4 py-2 rounded-md
+          hover:bg-[var(--color-brand-primary-hover)] transition disabled:opacity-80 disabled:cursor-not-allowed"
+				disabled={!isTyping}>Search</button
+			>
 		</form>
 
 		{#if showSuggestions}
-			<div class="suggestions">
+			<div
+				class="absolute top-full bg-[var(--color-background-surface)] w-full mt-1
+        rounded-md shadow-lg max-h-300 left-0 border border-[var(--color-border)]"
+			>
 				{#each suggestions as suggestion, index}
-					<div class="suggestions-item" class:suggestion-item-selected={index === selectedIndex}>
+					<button
+						type="button"
+						class="w-full text-left px-3 py-2 cursor-pointer transition-colors border-0 {index ===
+						selectedIndex
+							? 'bg-[var(--color-brand-primary)] text-white'
+							: 'bg-transparent text-[var(--color-text-body)] hover:bg-[var(--color-background-input)]'}"
+						onclick={() => selectSuggestion(suggestion)}
+					>
 						{suggestion.place_name}
-					</div>
+					</button>
 				{/each}
 			</div>
 		{/if}
@@ -156,13 +173,6 @@
 </div>
 
 <style>
-	.search-box {
-		background-color: var(--color-background-surface);
-		padding: 10px;
-		border-radius: 5px;
-		width: 100%;
-	}
-
 	.search-container {
 		display: flex;
 		position: absolute;
@@ -189,12 +199,6 @@
 		top: 10px;
 		transform: translateX(-50%);
 		width: 500px;
-	}
-
-	.search-box .search-form {
-		display: flex;
-		align-items: center;
-		gap: 8px;
 	}
 
 	.search-box input {
@@ -230,33 +234,5 @@
 		justify-content: center;
 		gap: 24px;
 		width: 100%;
-	}
-
-	/* Suggestions Dropdown */
-	.suggestions {
-		position: absolute;
-		top: 100%;
-		left: 0;
-		right: 0;
-		background: var(--color-background-surface);
-		border: 1px solid var(--color-border);
-		border-top: none;
-		border-radius: 0 0 4px 4px;
-		max-height: 300px;
-		overflow-y: auto;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-	}
-
-	.suggestions-item {
-		padding: 8px;
-		cursor: pointer;
-		transition: background-color 0.2s;
-		color: var(--color-text-body);
-		border-radius: 0 0 4px 4px;
-	}
-
-	.suggestion-item-selected,
-	.suggestions-item:hover {
-		background-color: var(--color-brand-primary);
 	}
 </style>
