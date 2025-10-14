@@ -182,8 +182,10 @@
 				type="submit"
 				class="bg-primary text-off-white px-4 py-2 rounded-md font-semibold
           hover:bg-primary-hover transition disabled:opacity-80 disabled:cursor-not-allowed"
-				disabled={!isTyping}>Search</button
+				disabled={!isTyping}
 			>
+				Search
+			</button>
 		</form>
 
 		{#if showSuggestions || isLoading}
