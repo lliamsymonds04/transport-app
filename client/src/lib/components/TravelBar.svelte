@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Locate, ArrowBigRight } from 'lucide-svelte';
+	import { Locate } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 	import type { LatLngTuple } from 'leaflet';
@@ -32,16 +32,15 @@
 </script>
 
 <div
-	class="absolute bottom-4 left-1/2 -translate-x-1/2 -translate-y-full z-10 bg-surface rounded-md p-4"
+	class="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 bg-surface rounded-md p-4"
 	transition:slide={{ duration: 400, axis: 'y' }}
 >
-	<div class="flex flex-row gap-2">
+	<div class="flex flex-row gap-2 items-center">
 		<Locate class="text-primary" />
-		<ArrowBigRight class="text-secondary text-sm" />
 		<input
 			type="text"
 			class="flex-1 ml-2 bg-transparent text-body font-semibold w-64"
-			placeholder={permissionGranted ? '-> Your Location' : 'Enter starting location'}
+			placeholder={permissionGranted ? 'Your Location' : 'Enter starting location'}
 		/>
 	</div>
 
