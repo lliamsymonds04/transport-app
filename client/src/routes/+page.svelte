@@ -8,10 +8,12 @@
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 
 	const Brisbane: LatLngTuple = [-27.4685, 153.0239];
+	const defaultZoom = 15;
 	let mapComponent: MapView;
 	let mapElement = $state<LeafletMap | null>(null);
 	let searchValue: MapboxFeature | null = $state(null);
-	let userCoords: LatLngTuple= $state(Brisbane);
+	let userCoords: LatLngTuple = $state(Brisbane);
+	let locationPermissionGranted = $state(false);
 
 	async function loadUserLocation() {
 		try {
@@ -19,9 +21,9 @@
 			console.log('User location:', userLocation);
 			if (userLocation) {
 				const coords: LatLngTuple = [userLocation.coords.latitude, userLocation.coords.longitude];
-				mapComponent.setView(coords, 15);
-				mapComponent.addMarker(coords[0], coords[1], 'You are here');
+				mapComponent.setView(coords, defaultZoom);
 				userCoords = coords;
+				locationPermissionGranted = true;
 			}
 		} catch (error) {
 			console.error('Error getting user location:', error);
@@ -30,7 +32,7 @@
 
 	function handleMapReady(map: LeafletMap) {
 		mapElement = map;
-		mapComponent.setView(Brisbane, 15);
+		mapComponent.setView(Brisbane, defaultZoom);
 
 		loadUserLocation();
 	}
@@ -57,7 +59,11 @@
 	<SearchBar onSearchSubmit={handleSearch} proximity={userCoords} bind:searchValue />
 
 	{#if searchValue}
-		<TravelBar destination={searchValue} />
+		<TravelBar
+			destination={searchValue}
+			userLocation={userCoords}
+			permissionGranted={locationPermissionGranted}
+		/>
 	{/if}
 </div>
 
