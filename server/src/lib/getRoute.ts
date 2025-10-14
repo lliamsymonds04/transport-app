@@ -1,6 +1,12 @@
 const RouteEndpoint = 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
-async function getRoute(start: [number, number], end: [number, number]) {
+export interface LatLng {
+    latitude: number;
+    longitude: number;
+}
+
+async function getRoute(start: LatLng, end: LatLng) {
+    // Todo: add leave time and arrival time options
     const api_key = process.env.GOOGLE_MAPS_API_KEY;
     if (!api_key) {
         throw new Error('GOOGLE_MAPS_API_KEY is not set in environment variables');
@@ -17,19 +23,11 @@ async function getRoute(start: [number, number], end: [number, number]) {
             body: JSON.stringify({
                 origin: {
                     location: {
-                        latLng: {
-                            latitude: start[0],
-                            longitude: start[1],
-                        },
-                    },
+                        latLng: start,                   },
                 },
                 destination: {
                     location: {
-                        latLng: {
-                            latitude: end[0],
-                            longitude: end[1],
-                        },
-                    },
+                        latLng: end,                   },
                 },
                 travelMode: 'Transit',
                 routingPreference: 'Traffic_Aware',
