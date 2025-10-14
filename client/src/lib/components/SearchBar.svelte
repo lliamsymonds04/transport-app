@@ -228,6 +228,7 @@
 		align-items: center;
 		justify-items: center;
 		gap: 12px;
+		max-width: 90%;
 		transition:
 			top 0.3s ease,
 			transform 0.3s ease,
@@ -235,7 +236,7 @@
 	}
 
 	.search-container-center {
-		top: 40%;
+		top: 35%;
 		transform: translate(-50%, -50%);
 		width: 300px;
 	}
