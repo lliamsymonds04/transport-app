@@ -11,6 +11,7 @@
 	let mapComponent: MapView;
 	let mapElement = $state<LeafletMap | null>(null);
 	let searchValue: MapboxFeature | null = $state(null);
+	let userCoords: LatLngTuple= $state(Brisbane);
 
 	async function loadUserLocation() {
 		try {
@@ -20,6 +21,7 @@
 				const coords: LatLngTuple = [userLocation.coords.latitude, userLocation.coords.longitude];
 				mapComponent.setView(coords, 15);
 				mapComponent.addMarker(coords[0], coords[1], 'You are here');
+				userCoords = coords;
 			}
 		} catch (error) {
 			console.error('Error getting user location:', error);
@@ -52,7 +54,7 @@
 <div class="map-container">
 	<MapView bind:this={mapComponent} onMapReady={handleMapReady} />
 
-	<SearchBar onSearchSubmit={handleSearch} proximity={Brisbane} bind:searchValue />
+	<SearchBar onSearchSubmit={handleSearch} proximity={userCoords} bind:searchValue />
 
 	{#if searchValue}
 		<TravelBar destination={searchValue} />
