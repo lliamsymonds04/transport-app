@@ -11,12 +11,25 @@ describe('GET /', () => {
 
 // test the route endpoint
 describe('GET /route', () => {
+    let originalApiKey: string | undefined;
+
+    // Save the original API key before each test
+    beforeEach(() => {
+        originalApiKey = process.env.GOOGLE_MAPS_API_KEY;
+    });
+
+    // Restore the original API key after each test
+    afterEach(() => {
+        process.env.GOOGLE_MAPS_API_KEY = originalApiKey;
+    });
+
     it('should return 400 if query parameters are missing', async () => {
         const res = await request(app).get('/route');
         expect(res.statusCode).toEqual(400);
     });
 
     it('should return 500 if GOOGLE_MAPS_API_KEY is not set', async () => {
+        process.env.GOOGLE_MAPS_API_KEY = '';
         const res = await request(app)
             .get('/route')
             .query({ startLat: '37.7749', startLng: '-122.4194', endLat: '34.0522', endLng: '-118.2437' });
@@ -36,7 +49,7 @@ describe('GET /route', () => {
     it("should return 200 and route data if GOOGLE_MAPS_API_KEY is valid", async () => {
         const res = await request(app)
             .get('/route')
-            .query({ startLat: '37.7749', startLng: '-122.4194', endLat: '34.0522', endLng: '-118.2437' });
+            .query({ startLat: '-27.469891', startLng: '153.025124', endLat: '-27.495432', endLng: '153.012024' });
         expect(res.statusCode).toEqual(200);
         expect(res.body).toHaveProperty('routes');
     });

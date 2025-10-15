@@ -19,19 +19,23 @@ export async function getRoute(start: LatLng, end: LatLng) {
             headers: {
                 'Content-Type': 'application/json',
                 'X-Goog-Api-Key': api_key,
+                //  'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
+                'X-Goog-FieldMask': 'routes.legs.steps.transitDetails'
             },
             body: JSON.stringify({
                 origin: {
                     location: {
-                        latLng: start,                   },
+                        latLng: start,
+                    },
                 },
                 destination: {
                     location: {
-                        latLng: end,                   },
+                        latLng: end,
+                    },
                 },
-                travelMode: 'Transit',
-                routingPreference: 'Traffic_Aware',
-                computeAlternativeRoutes: false,
+                travelMode: 'TRANSIT',
+                // routingPreference: 'TRAFFIC_AWARE',
+                // computeAlternativeRoutes: false,
                 languageCode: "en-AU",
                 units: "METRIC"
             }),
