@@ -1,4 +1,4 @@
-const express = require('express');
+import express from 'express';
 import type { Request, Response } from 'express';
 import type { LatLng } from './lib/getRoute.js';
 import { getRoute } from './lib/getRoute.js';
