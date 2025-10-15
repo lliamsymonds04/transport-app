@@ -1,6 +1,6 @@
 const express = require('express');
 import type { Request, Response } from 'express';
-import type { LatLng } from './lib/getRoute';
+import type { LatLng } from './lib/getRoute.js';
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();

@@ -1,5 +1,6 @@
 {
   "name": "server",
+  "type": "module",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -10,7 +11,7 @@
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.7.0",
+    "@types/node": "^24.7.2",
     "@types/supertest": "^6.0.3",
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",

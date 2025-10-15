@@ -5,7 +5,7 @@ export interface LatLng {
     longitude: number;
 }
 
-async function getRoute(start: LatLng, end: LatLng) {
+export async function getRoute(start: LatLng, end: LatLng) {
     // Todo: add leave time and arrival time options
     const api_key = process.env.GOOGLE_MAPS_API_KEY;
     if (!api_key) {
@@ -46,4 +46,4 @@ async function getRoute(start: LatLng, end: LatLng) {
     return data;
 }
 
-module.exports = { getRoute };
+// module.exports = { getRoute };
