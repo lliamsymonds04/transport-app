@@ -45,5 +45,3 @@ export async function getRoute(start: LatLng, end: LatLng) {
     const data = await resp.json();
     return data;
 }
-
-// module.exports = { getRoute };

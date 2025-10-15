@@ -5,6 +5,6 @@ describe('GET /', () => {
     it('should return a welcome message', async () => {
         const res = await request(app).get('/');
         expect(res.statusCode).toEqual(200);
-        expect(res.body).toContain('Hello');
+        expect(res.body.message).toContain('Hello');
     });
 });
