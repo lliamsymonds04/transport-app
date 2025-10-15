@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Hello from TypeScript Express API!' });
+  res.json({ message: 'Hello from API!' });
 });
 
 app.get('/route', async (req: Request, res: Response) => {
