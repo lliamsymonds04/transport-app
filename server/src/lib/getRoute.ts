@@ -1,4 +1,4 @@
-import type { RoutesAPIResponse } from './routeTypes.js';
+import type { RoutesAPIResponse } from '../../../shared/routeTypes.js';
 const RouteEndpoint = 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
 export interface LatLng {

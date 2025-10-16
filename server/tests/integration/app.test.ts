@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../../src/app.js';
-import type { Route, RouteLeg, RouteStep, RoutesAPIResponse } from '../../src/lib/routeTypes.js';
+import type { Route, RouteLeg, RouteStep, RoutesAPIResponse } from '../../../shared/routeTypes.js';
 
 describe('GET /', () => {
     it('should return a welcome message', async () => {
