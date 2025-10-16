@@ -5,6 +5,7 @@
 	import { slide } from 'svelte/transition';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 	import type { LatLngTuple } from 'leaflet';
+	import type { RoutesAPIResponse } from '@shared/routeTypes';
 
 	const url = env.PUBLIC_SERVER_API_URL || 'http://localhost:3000';
 
@@ -37,7 +38,7 @@
 				throw new Error('Failed to fetch travel options');
 			}
 
-			const data = await response.json();
+			const data = (await response.json()) as RoutesAPIResponse;
 
 			console.log('Travel options data:', data);
 		} finally {
