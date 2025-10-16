@@ -1,4 +1,4 @@
-import type { RoutesAPIResponse } from '../../../shared/routeTypes.js';
+import type { RoutesAPIResponse } from '@shared/routeTypes.js';
 const RouteEndpoint = 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
 export interface LatLng {
@@ -20,7 +20,6 @@ export async function getRoute(start: LatLng, end: LatLng): Promise<RoutesAPIRes
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': api_key,
-        //'X-Goog-FieldMask': '*'
         'X-Goog-FieldMask': 'routes.polyline,routes.legs.steps.transitDetails,routes.legs.steps.polyline,routes.legs.steps.travelMode'
       },
       body: JSON.stringify({
