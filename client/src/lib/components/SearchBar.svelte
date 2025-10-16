@@ -182,10 +182,8 @@
 				type="submit"
 				class="bg-primary text-off-white px-4 py-2 rounded-md font-semibold
           hover:bg-primary-hover transition disabled:opacity-80 disabled:cursor-not-allowed"
-				disabled={!isTyping}
+				disabled={!isTyping}>Search</button
 			>
-				Search
-			</button>
 		</form>
 
 		{#if showSuggestions || isLoading}
@@ -230,7 +228,6 @@
 		align-items: center;
 		justify-items: center;
 		gap: 12px;
-		max-width: 90%;
 		transition:
 			top 0.3s ease,
 			transform 0.3s ease,
@@ -238,7 +235,7 @@
 	}
 
 	.search-container-center {
-		top: 35%;
+		top: 40%;
 		transform: translate(-50%, -50%);
 		width: 300px;
 	}

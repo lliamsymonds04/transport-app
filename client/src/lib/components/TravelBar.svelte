@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { env } from '$env/dynamic/public';
 	import { Locate } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 	import type { LatLngTuple } from 'leaflet';
+
+	const url = env.PUBLIC_SERVER_API_URL || 'http://localhost:3000';
 
 	interface Props {
 		destination: MapboxFeature;
@@ -19,9 +22,27 @@
 		loadingTravelOptions = true;
 
 		// Simulate an API call to fetch travel options
-		await new Promise((resolve) => setTimeout(resolve, 2000));
+		try {
+			// joing the coords to the url
+			const params = new URLSearchParams({
+				startLat: start[0].toString(),
+				startLng: start[1].toString(),
+				endLat: destination.coordinates.latitude.toString(),
+				endLng: destination.coordinates.longitude.toString()
+			});
 
-		loadingTravelOptions = false;
+			const response = await fetch(`${url}/route?${params.toString()}`);
+
+			if (!response.ok) {
+				throw new Error('Failed to fetch travel options');
+			}
+
+			const data = await response.json();
+
+			console.log('Travel options data:', data);
+		} finally {
+			loadingTravelOptions = false;
+		}
 	}
 
 	onMount(() => {
