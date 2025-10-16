@@ -1,10 +1,26 @@
 import express from 'express';
+import cors from 'cors';
 import type { Request, Response } from 'express';
 import type { LatLng } from './lib/getRoute.js';
 import { getRoute } from './lib/getRoute.js';
 
 const app = express();
 app.use(express.json());
+
+//cors middleware
+const allowedOrigins = ['http://localhost:5173'];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.get('/', (_: Request, res: Response) => {
   res.json({ message: 'Hello from API!' });
