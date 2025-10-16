@@ -1,5 +1,6 @@
 import request from 'supertest';
 import app from '../../src/app.js';
+import type { Route, RouteLeg, RouteStep, RoutesAPIResponse } from '../../src/lib/routeTypes.js';
 
 describe('GET /', () => {
     it('should return a welcome message', async () => {
@@ -50,7 +51,35 @@ describe('GET /route', () => {
         const res = await request(app)
             .get('/route')
             .query({ startLat: '-27.469891', startLng: '153.025124', endLat: '-27.495432', endLng: '153.012024' });
+        
         expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveProperty('routes');
+        
+        const body: RoutesAPIResponse = res.body;
+        
+        expect(body).toHaveProperty('routes');
+        expect(Array.isArray(body.routes)).toBe(true);
+
+        body.routes.forEach((route: Route) => {
+            expect(route).toHaveProperty('legs');
+            expect(Array.isArray(route.legs)).toBe(true);
+            expect(route).toHaveProperty('polyline');
+            expect(typeof route.polyline.encodedPolyline).toBe('string');
+
+            route.legs.forEach((leg: RouteLeg) => {
+                expect(leg).toHaveProperty('steps');
+                expect(Array.isArray(leg.steps)).toBe(true);
+
+                leg.steps.forEach((step: RouteStep) => {
+                    expect(step).toHaveProperty('travelMode');
+                    expect(['WALK', 'TRANSIT']).toContain(step.travelMode);
+                    expect(step).toHaveProperty('polyline');
+                    expect(typeof step.polyline.encodedPolyline).toBe('string');
+
+                    if (step.travelMode === 'TRANSIT') {
+                        expect(step).toHaveProperty('transitDetails');
+                    }
+                });
+            });
+        });
     });
 });
