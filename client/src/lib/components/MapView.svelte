@@ -14,7 +14,7 @@
 	let map: LeafletMap;
 	let L: typeof import('leaflet');
 	let markers: L.Marker[] = [];
-	let routeLine: L.Polyline | null = null;
+	let polylines: L.Polyline[] = [];
 
 	let { initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 
@@ -67,15 +67,22 @@
 	export function drawPolyline(encodedLine: string) {
 		if (map) {
 			const points = polyline.decode(encodedLine).map(([lat, lng]) => [lat, lng] as LatLngTuple);
-			routeLine = L.polyline(points, { color: 'blue' }).addTo(map);
-			map.fitBounds(routeLine.getBounds());
+			const line = L.polyline(points, { color: 'blue' }).addTo(map);
+			polylines.push(line);
 		}
 	}
 
-	export function removePolyline() {
-		if (map && routeLine) {
-			map.removeLayer(routeLine);
-			routeLine = null;
+	export function fitPolylines() {
+		if (map && polylines.length > 0) {
+			const group = L.featureGroup(polylines);
+			map.fitBounds(group.getBounds());
+		}
+	}
+
+	export function clearPolylines() {
+		if (map && polylines.length > 0) {
+			polylines.forEach((line) => map.removeLayer(line));
+			polylines.length = 0;
 		}
 	}
 

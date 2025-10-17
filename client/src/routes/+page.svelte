@@ -51,6 +51,15 @@
 			mapComponent.addMarker(coords[0], coords[1], mapboxFeature.name);
 		}
 	}
+
+	function drawPolylines(polylines: string[]) {
+		if (!mapElement) return;
+		mapComponent.clearPolylines();
+
+		polylines.forEach((polylineStr) => {
+			mapComponent.drawPolyline(polylineStr);
+		});
+	}
 </script>
 
 <div class="map-container">
