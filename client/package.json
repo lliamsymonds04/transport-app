@@ -40,6 +40,7 @@
 		"vitest-browser-svelte": "^0.1.0"
 	},
 	"dependencies": {
+		"@mapbox/polyline": "^1.2.1",
 		"@tailwindcss/vite": "^4.1.14",
 		"leaflet": "^1.9.4",
 		"lucide-svelte": "^0.544.0",

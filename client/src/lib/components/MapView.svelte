@@ -2,6 +2,7 @@
 	import 'leaflet/dist/leaflet.css';
 	import { onDestroy, onMount } from 'svelte';
 	import type { Map as LeafletMap, LatLngTuple } from 'leaflet';
+	import polyline from '@mapbox/polyline';
 
 	interface Props {
 		initialCenter?: LatLngTuple;
@@ -13,7 +14,7 @@
 	let map: LeafletMap;
 	let L: typeof import('leaflet');
 	let markers: L.Marker[] = [];
-	let polyline: L.Polyline | null = null;
+	let routeLine: L.Polyline | null = null;
 
 	let { initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 
@@ -63,17 +64,18 @@
 		markers = markers.filter((m) => m !== marker);
 	}
 
-	export function drawPolyline(points: LatLngTuple[]) {
+	export function drawPolyline(encodedLine: string) {
 		if (map) {
-			polyline = L.polyline(points, { color: 'blue' }).addTo(map);
-			map.fitBounds(polyline.getBounds());
+			const points = polyline.decode(encodedLine).map(([lat, lng]) => [lat, lng] as LatLngTuple);
+			routeLine = L.polyline(points, { color: 'blue' }).addTo(map);
+			map.fitBounds(routeLine.getBounds());
 		}
 	}
 
 	export function removePolyline() {
-		if (map && polyline) {
-			map.removeLayer(polyline);
-			polyline = null;
+		if (map && routeLine) {
+			map.removeLayer(routeLine);
+			routeLine = null;
 		}
 	}
 
