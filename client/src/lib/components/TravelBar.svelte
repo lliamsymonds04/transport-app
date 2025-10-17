@@ -13,7 +13,7 @@
 		destination: MapboxFeature;
 		userLocation: LatLngTuple;
 		permissionGranted: boolean;
-		drawPolylines: (polylines: string[]) => void;
+		drawPolylines: (polylines: string[], isLineDotted: boolean[]) => void;
 	}
 
 	let { destination, userLocation, permissionGranted, drawPolylines }: Props = $props();
@@ -41,8 +41,17 @@
 			const data = (await response.json()) as RoutesAPIResponse;
 
 			console.log('Travel options data:', data);
-			const polylines = data.routes.map((route) => route.polyline.encodedPolyline);
-			drawPolylines(polylines);
+			const route0 = data.routes[0];
+
+			const polylines = route0.legs.flatMap((leg) =>
+				leg.steps.map((step) => step.polyline.encodedPolyline)
+			);
+
+			const isDotted = route0.legs.flatMap((leg) =>
+				leg.steps.map((step) => step.travelMode === 'WALK')
+			);
+
+			drawPolylines(polylines, isDotted);
 		} finally {
 			loadingTravelOptions = false;
 		}

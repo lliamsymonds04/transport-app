@@ -17,10 +17,8 @@
 	let polylines: L.Polyline[] = [];
 
 	let { initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
-
-	const primaryColor = getComputedStyle(document.documentElement)
-		.getPropertyValue('--color-primary')
-		.trim();
+	let primaryColor: string = $state('#3388ff');
+	let secondaryColor: string = $state('#ffffff');
 
 	onMount(async () => {
 		L = await import('leaflet');
@@ -35,7 +33,13 @@
 				maxZoom: 20
 			}).addTo(map);
 		}
+		primaryColor = getComputedStyle(document.documentElement)
+			.getPropertyValue('--color-primary')
+			.trim();
 
+		secondaryColor = getComputedStyle(document.documentElement)
+			.getPropertyValue('--color-secondary')
+			.trim();
 		onMapReady?.(map);
 	});
 
@@ -68,11 +72,12 @@
 		markers = markers.filter((m) => m !== marker);
 	}
 
-	export function drawPolyline(encodedLine: string) {
+	export function drawPolyline(encodedLine: string, isDotted: boolean = false) {
 		if (map) {
 			const points = polyline.decode(encodedLine).map(([lat, lng]) => [lat, lng] as LatLngTuple);
 			const line = L.polyline(points, {
-				color: primaryColor,
+				color: isDotted ? secondaryColor : primaryColor,
+				dashArray: isDotted ? '5, 10' : '',
 				opacity: 0.8,
 				weight: 5,
 				lineJoin: 'round',
