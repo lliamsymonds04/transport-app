@@ -18,6 +18,10 @@
 
 	let { initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 
+	const primaryColor = getComputedStyle(document.documentElement)
+		.getPropertyValue('--color-primary')
+		.trim();
+
 	onMount(async () => {
 		L = await import('leaflet');
 
@@ -67,7 +71,13 @@
 	export function drawPolyline(encodedLine: string) {
 		if (map) {
 			const points = polyline.decode(encodedLine).map(([lat, lng]) => [lat, lng] as LatLngTuple);
-			const line = L.polyline(points, { color: 'blue' }).addTo(map);
+			const line = L.polyline(points, {
+				color: primaryColor,
+				opacity: 0.8,
+				weight: 5,
+				lineJoin: 'round',
+				lineCap: 'round'
+			}).addTo(map);
 			polylines.push(line);
 		}
 	}
