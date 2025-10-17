@@ -13,6 +13,7 @@
 	let map: LeafletMap;
 	let L: typeof import('leaflet');
 	let markers: L.Marker[] = [];
+	let polyline: L.Polyline | null = null;
 
 	let { initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 
@@ -60,6 +61,20 @@
 	export function removeMarker(marker: L.Marker) {
 		map.removeLayer(marker);
 		markers = markers.filter((m) => m !== marker);
+	}
+
+	export function drawPolyline(points: LatLngTuple[]) {
+		if (map) {
+			polyline = L.polyline(points, { color: 'blue' }).addTo(map);
+			map.fitBounds(polyline.getBounds());
+		}
+	}
+
+	export function removePolyline() {
+		if (map && polyline) {
+			map.removeLayer(polyline);
+			polyline = null;
+		}
 	}
 
 	onDestroy(() => {

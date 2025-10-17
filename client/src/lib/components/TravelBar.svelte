@@ -22,9 +22,8 @@
 	async function fetchTravelOptions(start: LatLngTuple) {
 		loadingTravelOptions = true;
 
-		// Simulate an API call to fetch travel options
 		try {
-			// joing the coords to the url
+			// join the coords to the url
 			const params = new URLSearchParams({
 				startLat: start[0].toString(),
 				startLng: start[1].toString(),
