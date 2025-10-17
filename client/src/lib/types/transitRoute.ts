@@ -6,7 +6,7 @@ interface DisplayTransit {
   stops: number;
 }
 
-interface DisplayRouteLeg {
+export interface DisplayRouteLeg {
   transitType: "Walk" | "Transit";
   arrivalTime: Date;
   leaveTime: Date;
