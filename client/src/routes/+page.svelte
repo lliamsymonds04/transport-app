@@ -57,6 +57,7 @@
 		mapComponent.clearPolylines();
 
 		polylines.forEach((polylineStr) => {
+			console.log('Drawing polyline:', polylineStr);
 			mapComponent.drawPolyline(polylineStr);
 		});
 	}
@@ -72,6 +73,7 @@
 			destination={searchValue}
 			userLocation={userCoords}
 			permissionGranted={locationPermissionGranted}
+			{drawPolylines}
 		/>
 	{/if}
 </div>

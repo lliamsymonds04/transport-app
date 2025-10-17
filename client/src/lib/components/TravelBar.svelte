@@ -13,9 +13,10 @@
 		destination: MapboxFeature;
 		userLocation: LatLngTuple;
 		permissionGranted: boolean;
+		drawPolylines: (polylines: string[]) => void;
 	}
 
-	let { destination, userLocation, permissionGranted }: Props = $props();
+	let { destination, userLocation, permissionGranted, drawPolylines }: Props = $props();
 
 	let loadingTravelOptions = $state(false);
 
@@ -40,6 +41,8 @@
 			const data = (await response.json()) as RoutesAPIResponse;
 
 			console.log('Travel options data:', data);
+			const polylines = data.routes.map((route) => route.polyline.encodedPolyline);
+			drawPolylines(polylines);
 		} finally {
 			loadingTravelOptions = false;
 		}
