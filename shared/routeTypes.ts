@@ -14,30 +14,39 @@ export interface TransitStop {
 }
 
 export interface TransitTime {
-    text: string;
-    timeZone: string;
+  text: string;
 }
 
 export interface LocalizedTransitTime {
-    time: TransitTime;
+  time: TransitTime;
+  timeZone: string;
+}
+
+export interface TransitAgency {
+    name: string;
+    phoneNumber: string;
+    uri: string;
 }
 
 export interface TransitDetails {
   stopDetails: {
     arrivalStop: TransitStop;
     departureStop: TransitStop;
-    arrivalTime: string;
-    departureTime: string;
   };
+  arrivalTime: string;
+  departureTime: string;
   localizedValues: {
-      arrivalTime: LocalizedTransitTime;
-      departureTime: LocalizedTransitTime;
+    arrivalTime: LocalizedTransitTime;
+    departureTime: LocalizedTransitTime;
   };
   headsign: string;
   transitLine: {
+    agencies: TransitAgency[];
     name: string;
-    nameShort: string;
+    uri: string;
     color: string;
+    nameShort: string;
+    textColor: string;
     vehicle: {
       name: {
         text: string;
@@ -50,18 +59,20 @@ export interface TransitDetails {
 }
 
 export interface RouteStep {
+  staticDuration: string;
   polyline: Polyline;
-  travelMode: 'WALK' | 'TRANSIT';
+  travelMode: "WALK" | "TRANSIT";
   transitDetails?: TransitDetails;
 }
 
 export interface RouteLeg {
+  distanceMeters: number;
+  duration: string;
   steps: RouteStep[];
 }
 
 export interface Route {
   legs: RouteLeg[];
-  polyline: Polyline;
 }
 
 export interface RoutesAPIResponse {

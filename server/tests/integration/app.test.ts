@@ -62,10 +62,12 @@ describe('GET /route', () => {
     body.routes.forEach((route: Route) => {
       expect(route).toHaveProperty('legs');
       expect(Array.isArray(route.legs)).toBe(true);
-      expect(route).toHaveProperty('polyline');
-      expect(typeof route.polyline.encodedPolyline).toBe('string');
 
       route.legs.forEach((leg: RouteLeg) => {
+        expect(leg).toHaveProperty('distanceMeters');
+        expect(typeof leg.distanceMeters).toBe('number');
+        expect(leg).toHaveProperty('duration');
+        expect(typeof leg.duration).toBe('string');
         expect(leg).toHaveProperty('steps');
         expect(Array.isArray(leg.steps)).toBe(true);
 

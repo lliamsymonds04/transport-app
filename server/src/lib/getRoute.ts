@@ -20,7 +20,10 @@ export async function getRoute(start: LatLng, end: LatLng): Promise<RoutesAPIRes
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': api_key,
-        'X-Goog-FieldMask': 'routes.polyline,routes.legs.steps.transitDetails,routes.legs.steps.polyline,routes.legs.steps.travelMode'
+        //'X-Goog-FieldMask': 'routes.polyline,routes.legs.steps.transitDetails,routes.legs.steps.polyline,routes.legs.steps.travelMode'
+        //'X-Goog-FieldMask': 'routes.polyline,routes.legs.steps.transitDetails,routes.legs.steps.polyline,routes.legs.steps.travelMode,routes.legs.departureTime,routes.legs.arrivalTime'
+        //'X-Goog-FieldMask': '*'
+        'X-Goog-FieldMask': 'routes.legs.distanceMeters,routes.legs.duration,routes.legs.steps.staticDuration,routes.legs.steps.travelMode,routes.legs.steps.polyline,routes.legs.steps.transitDetails'
       },
       body: JSON.stringify({
         origin: {
@@ -46,6 +49,5 @@ export async function getRoute(start: LatLng, end: LatLng): Promise<RoutesAPIRes
   }
 
   const data = (await resp.json()) as RoutesAPIResponse;
-  console.log(data);
   return data;
 }
