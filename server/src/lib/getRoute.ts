@@ -1,4 +1,5 @@
 import type { RoutesAPIResponse } from '@shared/routeTypes.js';
+import { get, set } from './cache.js';
 const RouteEndpoint = 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
 export interface LatLng {
@@ -7,6 +8,12 @@ export interface LatLng {
 }
 
 export async function getRoute(start: LatLng, end: LatLng): Promise<RoutesAPIResponse> {
+  const cacheKey = `${start.latitude},${start.longitude},${end.latitude},${end.longitude}`;
+  const cachedRoute = get(cacheKey);
+  if (cachedRoute) {
+    return { routes: [cachedRoute] };
+  }
+
   // Todo: add leave time and arrival time options
   const api_key = process.env.GOOGLE_MAPS_API_KEY;
   if (!api_key) {
@@ -20,8 +27,6 @@ export async function getRoute(start: LatLng, end: LatLng): Promise<RoutesAPIRes
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': api_key,
-        //'X-Goog-FieldMask': 'routes.polyline,routes.legs.steps.transitDetails,routes.legs.steps.polyline,routes.legs.steps.travelMode'
-        //'X-Goog-FieldMask': 'routes.polyline,routes.legs.steps.transitDetails,routes.legs.steps.polyline,routes.legs.steps.travelMode,routes.legs.departureTime,routes.legs.arrivalTime'
         //'X-Goog-FieldMask': '*'
         'X-Goog-FieldMask': 'routes.legs.distanceMeters,routes.legs.duration,routes.legs.steps.staticDuration,routes.legs.steps.travelMode,routes.legs.steps.polyline,routes.legs.steps.transitDetails'
       },
@@ -49,5 +54,8 @@ export async function getRoute(start: LatLng, end: LatLng): Promise<RoutesAPIRes
   }
 
   const data = (await resp.json()) as RoutesAPIResponse;
+  if (data.routes && data.routes.length > 0) {
+    set(cacheKey, data.routes[0]);
+  }
   return data;
 }
