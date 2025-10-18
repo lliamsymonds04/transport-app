@@ -9,9 +9,9 @@ export interface LatLng {
 
 export async function getRoute(start: LatLng, end: LatLng): Promise<RoutesAPIResponse> {
   const cacheKey = `${start.latitude},${start.longitude},${end.latitude},${end.longitude}`;
-  const cachedRoute = get(cacheKey);
-  if (cachedRoute) {
-    return { routes: [cachedRoute] };
+  const cachedresponse = get(cacheKey);
+  if (cachedresponse) {
+    return cachedresponse;
   }
 
   // Todo: add leave time and arrival time options
@@ -55,7 +55,8 @@ export async function getRoute(start: LatLng, end: LatLng): Promise<RoutesAPIRes
 
   const data = (await resp.json()) as RoutesAPIResponse;
   if (data.routes && data.routes.length > 0) {
-    set(cacheKey, data.routes[0]);
+    //set(cacheKey, data.routes[0]);
+    set(cacheKey, data);
   }
   return data;
 }

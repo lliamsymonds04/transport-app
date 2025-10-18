@@ -1,10 +1,10 @@
 
-import type { Route } from "@shared/routeTypes";
+import type { RoutesAPIResponse } from "@shared/routeTypes.js";
 
-const cache = new Map<string, { route: Route, timestamp: number }>();
+const cache = new Map<string, { route: RoutesAPIResponse, timestamp: number }>();
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
-export function get(key: string): Route | null {
+export function get(key: string): RoutesAPIResponse | null {
   const cached = cache.get(key);
   if (!cached) {
     return null;
@@ -19,6 +19,6 @@ export function get(key: string): Route | null {
   return cached.route;
 }
 
-export function set(key: string, route: Route) {
+export function set(key: string, route: RoutesAPIResponse) {
   cache.set(key, { route, timestamp: Date.now() });
 }
