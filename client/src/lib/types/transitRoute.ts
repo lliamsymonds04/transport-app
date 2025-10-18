@@ -8,16 +8,17 @@ interface DisplayTransit {
 
 export interface DisplayRouteLeg {
   transitType: "Walk" | "Transit";
-  arrivalTime: Date;
-  leaveTime: Date;
+  arrivalTime?: Date;
+  leaveTime?: Date;
   transitDetails?: DisplayTransit;
+  duration: number;
 
 }
 
 export interface TransitRoute {
   duration: number;
   legs: DisplayRouteLeg[];
-  leaveTime: Date;
-  arriveTime: Date;
+  leaveTime?: Date;
+  arriveTime?: Date;
 
 }

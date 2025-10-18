@@ -1,10 +1,11 @@
-import type { Route, RouteStep } from "@shared/routeTypes";
+import type { Route, RouteStep, RouteLeg } from "@shared/routeTypes";
 import type { DisplayRouteLeg, TransitRoute } from "../types/transitRoute";
 
 export function formatRouteResponse(response: Route): TransitRoute {
   const allSteps = response.legs.flatMap(leg => leg.steps);
 
   const legs: DisplayRouteLeg[] = allSteps.map((step: RouteStep) => {
+    const durationInSeconds = parseInt(step.staticDuration.replace('s', ''));
     if (step.travelMode === "TRANSIT") {
       const { transitDetails } = step;
       return {
@@ -17,66 +18,70 @@ export function formatRouteResponse(response: Route): TransitRoute {
           arrivalStop: transitDetails!.stopDetails.arrivalStop.name,
           leaveStop: transitDetails!.stopDetails.departureStop.name,
           stops: transitDetails!.stopCount,
-        }
+        },
+        duration: durationInSeconds,
       };
     } else { // WALK
-      const durationInSeconds = parseInt(step.staticDuration.replace('s', ''));
       return {
         transitType: "Walk",
-        arrivalTime: new Date(0),
-        leaveTime: new Date(0),
-        duration: durationInSeconds, // temporary
+        //arrivalTime: new Date(0),
+        //leaveTime: new Date(0),
+        duration: durationInSeconds,
       } as any;
     }
   });
 
-  for (let i = 0; i < legs.length; i++) {
+  const mergedLegs: DisplayRouteLeg[] = [];
+  let i = 0;
+  while (i < legs.length) {
     if (legs[i].transitType === "Walk") {
-      const walkLeg = legs[i] as any;
-      const prevLeg = i > 0 ? legs[i - 1] : null;
-      const nextLeg = i < legs.length - 1 ? legs[i + 1] : null;
+      let combinedDuration = legs[i].duration;
+      let j = i + 1;
+      while (j < legs.length && legs[j].transitType === "Walk") {
+        combinedDuration += legs[j].duration;
+        j++;
+      }
+
+      let arrivalTime: Date | undefined = undefined;
+      let leaveTime: Date | undefined = undefined;
+
+      let nextLeg: DisplayRouteLeg | null = null;
+      if (j < legs.length) {
+        nextLeg = legs[j];
+      }
+
+      let prevLeg: DisplayRouteLeg | null = null;
+      if (i > 0) {
+        prevLeg = mergedLegs[mergedLegs.length - 1];
+      }
+
+      // handle the leave and arrival times
+      if (nextLeg) {
+        arrivalTime = nextLeg.leaveTime;
+      } else if (prevLeg) {
+        arrivalTime = new Date((prevLeg.arrivalTime as Date).getTime() + combinedDuration * 1000);
+      }
 
       if (prevLeg) {
-        walkLeg.leaveTime = prevLeg.arrivalTime;
-      }
-      if (nextLeg) {
-        walkLeg.arrivalTime = nextLeg.leaveTime;
-      }
-
-      if (walkLeg.leaveTime.getTime() && !walkLeg.arrivalTime.getTime()) {
-        walkLeg.arrivalTime = new Date(walkLeg.leaveTime.getTime() + walkLeg.duration * 1000);
+        leaveTime = prevLeg.arrivalTime;
+      } else if (nextLeg) {
+        leaveTime = new Date((nextLeg.leaveTime as Date).getTime() - combinedDuration * 1000);
       }
 
-      if (!walkLeg.leaveTime.getTime() && walkLeg.arrivalTime.getTime()) {
-        walkLeg.leaveTime = new Date(walkLeg.arrivalTime.getTime() - walkLeg.duration * 1000);
-      }
-    }
-  }
 
-  const mergedLegs: DisplayRouteLeg[] = [];
-  for (let i = 0; i < legs.length; i++) {
-    const currentLeg = legs[i];
-    if (currentLeg.transitType === "Walk") {
-      let combinedDuration = (currentLeg as any).duration;
-      let lastWalkIndex = i;
-      while (lastWalkIndex + 1 < legs.length && legs[lastWalkIndex + 1].transitType === "Walk") {
-        lastWalkIndex++;
-        combinedDuration += (legs[lastWalkIndex] as any).duration;
-      }
-
-      const mergedWalkLeg: DisplayRouteLeg = {
+      mergedLegs.push({
         transitType: "Walk",
-        leaveTime: currentLeg.leaveTime,
-        arrivalTime: legs[lastWalkIndex].arrivalTime,
-      };
-      mergedLegs.push(mergedWalkLeg);
-      i = lastWalkIndex;
+        leaveTime: leaveTime,
+        arrivalTime,
+        duration: combinedDuration,
+      });
+
+      i = j; // skip merged legs
     } else {
-      mergedLegs.push(currentLeg);
+      mergedLegs.push(legs[i]);
+      i++;
     }
   }
-
-  mergedLegs.forEach(leg => delete (leg as any).duration);
 
   const totalDuration = response.legs.reduce((total, leg) => total + parseInt(leg.duration.slice(0, -1)), 0);
 
