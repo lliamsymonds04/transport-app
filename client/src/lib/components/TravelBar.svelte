@@ -132,15 +132,20 @@
 							{#if leg.transitType === 'Walk'}
 								<div class="flex flex-row items-center gap-2">
 									<Footprints class="inline-block mr-1" />
+									<p class="text-body">for {Math.round(leg.duration / 60)} minutes</p>
 								</div>
 							{:else if leg.transitType === 'Transit' && leg.transitDetails && leg.leaveTime}
-								<div class="flex flex-row items-center gap-2">
+								<div class="flex flex-row items-start gap-2">
 									<Bus class="inline-block mr-1" />
-									<p class="text-body font-semibold">{leg.transitDetails.shortName}</p>
-									<p>at {formatTime(leg.leaveTime)}</p>
+									<div>
+										<div class="flex flex-row items-center gap-2">
+											<p class="text-body font-bold">{leg.transitDetails.shortName}</p>
+											<p>at {formatTime(leg.leaveTime)}</p>
+										</div>
+										<p>from: {leg.transitDetails.leaveStop}</p>
+										<p>to: {leg.transitDetails.arrivalStop}</p>
+									</div>
 								</div>
-								<p>from: {leg.transitDetails.leaveStop}</p>
-								<p>to {leg.transitDetails.arrivalStop}</p>
 							{/if}
 						</div>
 					{/each}

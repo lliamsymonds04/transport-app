@@ -1,4 +1,4 @@
-import type { Route, RouteStep, RouteLeg } from "@shared/routeTypes";
+import type { Route, RouteStep } from "@shared/routeTypes";
 import type { DisplayRouteLeg, TransitRoute } from "../types/transitRoute";
 
 export function formatRouteResponse(response: Route): TransitRoute {
@@ -24,8 +24,6 @@ export function formatRouteResponse(response: Route): TransitRoute {
     } else { // WALK
       return {
         transitType: "Walk",
-        //arrivalTime: new Date(0),
-        //leaveTime: new Date(0),
         duration: durationInSeconds,
       } as any;
     }
