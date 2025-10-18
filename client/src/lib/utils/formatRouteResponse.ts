@@ -9,8 +9,8 @@ export function formatRouteResponse(response: Route): TransitRoute {
       const { transitDetails } = step;
       return {
         transitType: "Transit",
-        arrivalTime: new Date(transitDetails!.arrivalTime),
-        leaveTime: new Date(transitDetails!.departureTime),
+        arrivalTime: new Date(transitDetails!.stopDetails.arrivalTime),
+        leaveTime: new Date(transitDetails!.stopDetails.departureTime),
         transitDetails: {
           name: transitDetails!.transitLine.name,
           shortName: transitDetails!.transitLine.nameShort,

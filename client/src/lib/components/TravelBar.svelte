@@ -3,9 +3,11 @@
 	import { env } from '$env/dynamic/public';
 	import { Locate } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
+	import { formatRouteResponse } from '$lib/utils/formatRouteResponse';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 	import type { LatLngTuple } from 'leaflet';
 	import type { RoutesAPIResponse } from '@shared/routeTypes';
+	import type { TransitRoute } from '$lib/types/transitRoute';
 
 	const url = env.PUBLIC_SERVER_API_URL || 'http://localhost:3000';
 
@@ -19,6 +21,11 @@
 	let { destination, userLocation, permissionGranted, drawPolylines }: Props = $props();
 
 	let loadingTravelOptions = $state(false);
+	let travelOptions: TransitRoute[] = $state([]);
+	let selectionOption: number | null = $state(null);
+	let selectedRoute: TransitRoute | null = $derived.by(() => {
+		return selectionOption !== null ? travelOptions[selectionOption] : null;
+	});
 
 	async function fetchTravelOptions(start: LatLngTuple) {
 		loadingTravelOptions = true;
@@ -39,6 +46,8 @@
 			}
 
 			const data = (await response.json()) as RoutesAPIResponse;
+			travelOptions = data.routes.map((route) => formatRouteResponse(route));
+			console.log('formatted travel options:', travelOptions);
 
 			console.log('Travel options data:', data);
 			const route0 = data.routes[0];

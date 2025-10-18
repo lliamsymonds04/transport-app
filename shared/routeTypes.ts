@@ -23,18 +23,18 @@ export interface LocalizedTransitTime {
 }
 
 export interface TransitAgency {
-    name: string;
-    phoneNumber: string;
-    uri: string;
+  name: string;
+  phoneNumber: string;
+  uri: string;
 }
 
 export interface TransitDetails {
   stopDetails: {
     arrivalStop: TransitStop;
+    arrivalTime: string;
     departureStop: TransitStop;
+    departureTime: string;
   };
-  arrivalTime: string;
-  departureTime: string;
   localizedValues: {
     arrivalTime: LocalizedTransitTime;
     departureTime: LocalizedTransitTime;
