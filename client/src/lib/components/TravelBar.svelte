@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { env } from '$env/dynamic/public';
-	import { Locate } from 'lucide-svelte';
+	import { Locate, Footprints, Bus } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import { formatRouteResponse } from '$lib/utils/formatRouteResponse';
+	import { formatTime } from '$lib/utils/formatTime';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 	import type { LatLngTuple } from 'leaflet';
 	import type { RoutesAPIResponse } from '@shared/routeTypes';
@@ -25,6 +26,21 @@
 	let selectionOption: number | null = $state(null);
 	let selectedRoute: TransitRoute | null = $derived.by(() => {
 		return selectionOption !== null ? travelOptions[selectionOption] : null;
+	});
+	let arriveTime: string | null = $derived.by(() => {
+		if (selectedRoute && selectedRoute.legs.length > 0) {
+			const lastLeg = selectedRoute.legs[selectedRoute.legs.length - 1];
+			if (lastLeg.arrivalTime) return formatTime(lastLeg.arrivalTime) || null;
+		}
+		return null;
+	});
+
+	let leaveTime: string | null = $derived.by(() => {
+		if (selectedRoute && selectedRoute.legs.length > 0) {
+			const firstLeg = selectedRoute.legs[0];
+			if (firstLeg.leaveTime) return formatTime(firstLeg.leaveTime) || null;
+		}
+		return null;
 	});
 
 	async function fetchTravelOptions(start: LatLngTuple) {
@@ -98,19 +114,33 @@
 			<!-- Display travel options here -->
 			{#if selectedRoute}
 				<div class="mt-2 p-2 border border-primary rounded">
+					{#if arriveTime && leaveTime}
+						<p class="text-body">
+							From: {leaveTime} - {arriveTime}
+						</p>
+					{/if}
 					<p class="text-body">
-						<span class="font-bold">{Math.round(selectedRoute.duration / 60)} mins</span>, {selectedRoute.distance}
-						km}
+						<span class="font-bold">
+							{Math.round(selectedRoute.duration / 60)} mins
+						</span>, {selectedRoute.distance}km
 					</p>
+
+					<div class="border-border border-b-1 w-full my-2"></div>
 					<!-- Add more details as needed -->
-					{#each selectedRoute.legs as leg, legIndex}
+					{#each selectedRoute.legs as leg}
 						<div class="mt-2">
-							<p class="text-body font-semibold">Leg {legIndex + 1}:</p>
-							<p class="text-body font-semibold">{leg.transitType}:</p>
-							{#if leg.transitDetails}
-								<p class="text-body">Line: {leg.transitDetails.shortName}</p>
-								<p class="text-body">From: {leg.transitDetails.leaveStop} at {leg.leaveTime}</p>
-								<p class="text-body">To: {leg.transitDetails.arrivalStop} at {leg.arrivalTime}</p>
+							{#if leg.transitType === 'Walk'}
+								<div class="flex flex-row items-center gap-2">
+									<Footprints class="inline-block mr-1" />
+								</div>
+							{:else if leg.transitType === 'Transit' && leg.transitDetails && leg.leaveTime}
+								<div class="flex flex-row items-center gap-2">
+									<Bus class="inline-block mr-1" />
+									<p class="text-body font-semibold">{leg.transitDetails.shortName}</p>
+									<p>at {formatTime(leg.leaveTime)}</p>
+								</div>
+								<p>from: {leg.transitDetails.leaveStop}</p>
+								<p>to {leg.transitDetails.arrivalStop}</p>
 							{/if}
 						</div>
 					{/each}
