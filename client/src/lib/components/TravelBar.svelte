@@ -47,9 +47,10 @@
 
 			const data = (await response.json()) as RoutesAPIResponse;
 			travelOptions = data.routes.map((route) => formatRouteResponse(route));
-			console.log('formatted travel options:', travelOptions);
+			selectionOption = 0; // Automatically select the first option
 
-			console.log('Travel options data:', data);
+			console.log('Fetched travel options:', travelOptions);
+
 			const route0 = data.routes[0];
 
 			const polylines = route0.legs.flatMap((leg) =>
@@ -93,8 +94,28 @@
 	{:else if destination}
 		<div class="mt-2">
 			<p class="text-body font-semibold">To: {destination.name}</p>
+
 			<!-- Display travel options here -->
-			<p class="text-body">(Travel options would be displayed here)</p>
+			{#if selectedRoute}
+				<div class="mt-2 p-2 border border-primary rounded">
+					<p class="text-body">
+						<span class="font-bold">{Math.round(selectedRoute.duration / 60)} mins</span>, {selectedRoute.distance}
+						km}
+					</p>
+					<!-- Add more details as needed -->
+					{#each selectedRoute.legs as leg, legIndex}
+						<div class="mt-2">
+							<p class="text-body font-semibold">Leg {legIndex + 1}:</p>
+							<p class="text-body font-semibold">{leg.transitType}:</p>
+							{#if leg.transitDetails}
+								<p class="text-body">Line: {leg.transitDetails.shortName}</p>
+								<p class="text-body">From: {leg.transitDetails.leaveStop} at {leg.leaveTime}</p>
+								<p class="text-body">To: {leg.transitDetails.arrivalStop} at {leg.arrivalTime}</p>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>

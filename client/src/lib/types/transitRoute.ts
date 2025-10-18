@@ -18,6 +18,7 @@ export interface DisplayRouteLeg {
 export interface TransitRoute {
   duration: number;
   legs: DisplayRouteLeg[];
+  distance: string;
   leaveTime?: Date;
   arriveTime?: Date;
 

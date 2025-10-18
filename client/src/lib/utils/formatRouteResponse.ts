@@ -90,5 +90,6 @@ export function formatRouteResponse(response: Route): TransitRoute {
     legs: mergedLegs,
     leaveTime: mergedLegs[0].leaveTime,
     arriveTime: mergedLegs[mergedLegs.length - 1].arrivalTime,
+    distance: ((response.legs[0].distanceMeters) / 1000).toFixed(2),
   };
 }
