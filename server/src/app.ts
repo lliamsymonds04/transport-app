@@ -3,6 +3,7 @@ import cors from 'cors';
 import type { Request, Response } from 'express';
 import type { LatLng } from './lib/getRoute.js';
 import { getRoute } from './lib/getRoute.js';
+import { getBusLocations } from './lib/getBusLocations.js';
 
 const app = express();
 app.use(express.json());
@@ -48,6 +49,16 @@ app.get('/route', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching route:', error);
     res.status(500).json({ error: 'Failed to fetch route' });
+  }
+});
+
+app.get('/bus-locations', async (_: Request, res: Response) => {
+  try {
+    const busLocations = await getBusLocations();
+    res.json(busLocations);
+  } catch (errror) {
+    console.error('Error fetching bus locations:', errror);
+    res.status(500).json({ error: 'Failed to fetch bus locations' });
   }
 });
 
