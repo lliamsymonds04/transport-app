@@ -12,3 +12,10 @@ export interface MapboxSuggestion {
   address?: string;
   distance?: number;
 }
+
+export interface SuggestionRaw {
+	mapbox_id: string;
+	name: string;
+	address: string;
+	distance?: number;
+}

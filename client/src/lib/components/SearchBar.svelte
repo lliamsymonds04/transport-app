@@ -4,7 +4,7 @@
 	import { v4 as uuidv4 } from 'uuid';
 	import { metersToKilometers } from '$lib/utils/metersToKilometers';
 	import type { LatLngTuple } from 'leaflet';
-	import type { MapboxFeature, MapboxSuggestion } from '$lib/types/mapboxFeature';
+	import type { MapboxFeature, MapboxSuggestion, SuggestionRaw } from '$lib/types/mapboxFeature';
 
 	const MapboxApiKey = env.PUBLIC_MAPBOX_TOKEN;
 
@@ -13,6 +13,8 @@
 		searchValue: MapboxFeature | null;
 		proximity?: LatLngTuple;
 	}
+
+  
 
 	let { onSearchSubmit, proximity, searchValue = $bindable() }: Props = $props();
 	let query = $state('');
@@ -49,7 +51,7 @@
 			const response = await fetch(url);
 
 			const data = await response.json();
-			suggestions = data.suggestions.map((suggestion: any) => ({
+			suggestions = data.suggestions.map((suggestion: SuggestionRaw) => ({
 				id: suggestion.mapbox_id,
 				name: suggestion.name,
 				address: suggestion.address,
@@ -195,7 +197,7 @@
 					<p class="text-body px-3 py-2 font-semibold">Loading...</p>
 				{/if}
 
-				{#each suggestions as suggestion, index}
+				{#each suggestions as suggestion, index (suggestion.id)}
 					<button
 						type="button"
 						class="w-full flex flex-row items-center justify-between text-left px-3 py-2 cursor-pointer transition-colors border-0 {index ===

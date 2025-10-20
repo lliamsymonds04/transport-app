@@ -127,7 +127,7 @@
 
 					<div class="border-border border-b-1 w-full my-2"></div>
 					<!-- Add more details as needed -->
-					{#each selectedRoute.legs as leg}
+					{#each selectedRoute.legs as leg, i (i)}
 						<div class="mt-2">
 							{#if leg.transitType === 'Walk'}
 								<div class="flex flex-row items-center gap-2">
