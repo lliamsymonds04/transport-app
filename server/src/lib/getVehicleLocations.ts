@@ -11,7 +11,16 @@ interface VehicleInfo {
   //transitType: number | null | undefined;
 }
 
+let cache: { data: VehicleInfo[]; timestamp: number } | null = null;
+const CACHE_DURATION = 60000; // 1 minute in milliseconds
+
 export async function getVehicleLocations() {
+  // Return cached data if still valid
+  if (cache && Date.now() - cache.timestamp < CACHE_DURATION) {
+    return cache.data;
+  }
+
+
   try {
     const response = await fetch(busLocationsUrl);
 
@@ -26,6 +35,7 @@ export async function getVehicleLocations() {
 
     feed.entity.forEach((entity) => {
       if (!entity.vehicle) return;
+      console.log(entity)
 
       vehicles.push({
         id: entity.id,
@@ -36,7 +46,15 @@ export async function getVehicleLocations() {
     });
 
     //return vehicles;
-    return feed.entity;
+    //const result = feed.entity;
+    
+    // Update cache
+    cache = {
+      data: vehicles,
+      timestamp: Date.now()
+    };
+
+    return vehicles;
 
   } catch (error) {
     console.error("Error in getVehicleLocations:", error);

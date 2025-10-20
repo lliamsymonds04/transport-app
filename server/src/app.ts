@@ -62,4 +62,4 @@ app.get('/vehicle-locations', async (_: Request, res: Response) => {
   }
 });
 
-export default app
+export default app;
