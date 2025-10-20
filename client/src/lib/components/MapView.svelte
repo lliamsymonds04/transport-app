@@ -3,6 +3,10 @@
 	import { onDestroy, onMount } from 'svelte';
 	import type { Map as LeafletMap, LatLngTuple } from 'leaflet';
 	import polyline from '@mapbox/polyline';
+	import { env } from '$env/dynamic/public';
+  import { createVehicleMarker } from '$lib/utils/VehicleMarker.js';
+  import type { VehicleInfo } from '@shared/vehicleInfo.js';
+  const url = env.PUBLIC_SERVER_API_URL || 'http://localhost:3000';
 
 	interface Props {
 		initialCenter?: LatLngTuple;
@@ -15,6 +19,8 @@
 	let L: typeof import('leaflet');
 	let markers: L.Marker[] = [];
 	let polylines: L.Polyline[] = [];
+  let vehicleMarkers: L.Marker[] = [];
+
 
 	let { initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 	let primaryColor: string = $state('#3388ff');
@@ -100,6 +106,35 @@
 			polylines.length = 0;
 		}
 	}
+
+  // Live Vehicle Tracking
+  function initTracking() {
+
+  }
+
+  async function updateVehicleLocations() {
+    try {
+      const response = await fetch(`${url}/vehicle-locations`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch vehicle locations');
+      }
+
+      const data: VehicleInfo[] = await response.json();
+      return data;
+    } catch {
+      console.error('Error fetching vehicle locations');
+    }
+  }
+
+  function clearVehicleMarkers() {
+    vehicleMarkers.forEach((marker) => map.removeLayer(marker));
+    vehicleMarkers = [];
+  }
+
+  function addVehicleMarker() {
+
+  }
 
 	onDestroy(() => {
 		map?.remove();
