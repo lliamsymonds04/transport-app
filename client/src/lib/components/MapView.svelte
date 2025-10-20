@@ -20,6 +20,7 @@
 	let markers: L.Marker[] = [];
 	let polylines: L.Polyline[] = [];
   let vehicleMarkers: L.Marker[] = [];
+  let vehicleUpdateInterval: ReturnType<typeof setInterval>;
 
 
 	let { initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
@@ -39,6 +40,7 @@
 				maxZoom: 20
 			}).addTo(map);
 		}
+
 		primaryColor = getComputedStyle(document.documentElement)
 			.getPropertyValue('--color-primary')
 			.trim();
@@ -47,6 +49,8 @@
 			.getPropertyValue('--color-secondary')
 			.trim();
 		onMapReady?.(map);
+
+    initTracking();
 	});
 
 	export function setView(center: LatLngTuple, zoom: number) {
@@ -109,7 +113,11 @@
 
   // Live Vehicle Tracking
   function initTracking() {
+    updateVehicleLocations()
 
+    vehicleUpdateInterval = setInterval(() => {
+      updateVehicleLocations();
+    }, 60000);
   }
 
   async function updateVehicleLocations() {
@@ -121,9 +129,18 @@
       }
 
       const data: VehicleInfo[] = await response.json();
-      return data;
+
+      clearVehicleMarkers();
+      console.log(data.length + ' vehicles tracked');
+
+      data.forEach((vehicle) => {
+        addVehicleMarker(vehicle);
+      });
+
+      // add the new vehicle markers
     } catch {
       console.error('Error fetching vehicle locations');
+      clearVehicleMarkers();
     }
   }
 
@@ -132,12 +149,27 @@
     vehicleMarkers = [];
   }
 
-  function addVehicleMarker() {
+  async function addVehicleMarker(vehicle: VehicleInfo) {
+    const icon = await createVehicleMarker(vehicle);
 
+    if (!vehicle.latitude || !vehicle.longitude) {
+      return;
+    }
+
+    const marker = L.marker([vehicle.latitude, vehicle.longitude], { icon })
+      .addTo(map)
+      .bindPopup(`Route: ${vehicle.route} <br>Type: ${vehicle.vehicleType}`);
+
+    vehicleMarkers.push(marker);
   }
 
 	onDestroy(() => {
 		map?.remove();
+
+    // if the interval is set clear it
+    if (vehicleUpdateInterval) {
+      clearInterval(vehicleUpdateInterval);
+    }
 	});
 </script>
 
