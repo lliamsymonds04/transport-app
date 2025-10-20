@@ -2,15 +2,7 @@ import GTFSRealtimeBindings from "gtfs-realtime-bindings";
 
 const busLocationsUrl = "https://gtfsrt.api.translink.com.au/api/realtime/SEQ/VehiclePositions";
 
-interface VehicleInfo {
-  id: string;
-  latitude: number | null;
-  longitude: number | null;
-  name: string | null;
-  vehicleType: string | null;
-  status: string | null;
-  route: string | null;
-}
+import type { VehicleInfo } from '@shared/vehicleInfo.js';
 
 let cache: { data: VehicleInfo[]; timestamp: number } | null = null;
 const CACHE_DURATION = 60000; // 1 minute in milliseconds
@@ -24,11 +16,11 @@ function getVehicleType(routeId: string | null): string | null {
   // Train routes with hyphens (e.g., "RWBR-4442", "GOLD-1234")
   if (routeId.match(/^[A-Z]{2,4}-\d+$/)) return "Train";
   
-  // Train routes are typically letter codes (e.g., "BPL", "CABG", "FERN", "GOLD")
-  if (routeId.match(/^[A-Z]{2,4}$/)) return "Train";
-  
   // Bus routes are numeric (e.g., "100", "111", "222")
   if (routeId.match(/^\d+$/)) return "Bus";
+
+  // Bus routes with trip identifiers (e.g., "412-1000", "553-4397")
+  if (routeId.match(/^\d+-\d+$/)) return "Bus";
   
   // Mixed alphanumeric might be special bus services (e.g., "P88", "N200")
   if (routeId.match(/^[A-Z]\d+$/)) return "Bus";
