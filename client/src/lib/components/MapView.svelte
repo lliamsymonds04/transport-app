@@ -1,7 +1,9 @@
 <script lang="ts">
 	import 'leaflet/dist/leaflet.css';
+  import 'leaflet.markercluster/dist/MarkerCluster.css';
+  import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 	import { onDestroy, onMount } from 'svelte';
-	import type { Map as LeafletMap, LatLngTuple } from 'leaflet';
+	import type { Map as LeafletMap, LatLngTuple, MarkerClusterGroup } from 'leaflet';
 	import polyline from '@mapbox/polyline';
 	import { env } from '$env/dynamic/public';
   import { createVehicleMarker } from '$lib/utils/VehicleMarker.js';
@@ -21,14 +23,19 @@
 	let polylines: L.Polyline[] = [];
   let vehicleMarkers: L.Marker[] = [];
   let vehicleUpdateInterval: ReturnType<typeof setInterval>;
-
+  let vehicleClusters: { [key: string]: MarkerClusterGroup } = {};
 
 	let { initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 	let primaryColor: string = $state('#3388ff');
 	let secondaryColor: string = $state('#ffffff');
 
 	onMount(async () => {
-		L = await import('leaflet');
+    const [leafletModule] = await Promise.all([
+      import('leaflet'),
+      import('leaflet.markercluster')
+    ]);
+    
+    L = leafletModule.default;
 
 		if (mapElement) {
 			map = L.map(mapElement).setView(initialCenter, initialZoom);
@@ -150,10 +157,16 @@
   }
 
   async function addVehicleMarker(vehicle: VehicleInfo) {
-    const icon = await createVehicleMarker(vehicle);
+    const icon = await createVehicleMarker(vehicle, 35);
 
     if (!vehicle.latitude || !vehicle.longitude) {
       return;
+    }
+
+    // Get or create cluster group
+    const vehicleType = vehicle.vehicleType || 'unknown';
+    if (!vehicleClusters[vehicleType]) {
+      addVehicleClusterGroup(vehicleType);
     }
 
     const marker = L.marker([vehicle.latitude, vehicle.longitude], { icon })
@@ -161,6 +174,18 @@
       .bindPopup(`Route: ${vehicle.route} <br>Type: ${vehicle.vehicleType}`);
 
     vehicleMarkers.push(marker);
+    vehicleClusters[vehicleType].addLayer(marker);
+  }
+
+  function addVehicleClusterGroup(groupName: string) {
+    const group = L.markerClusterGroup({ 
+      showCoverageOnHover: false, 
+      zoomToBoundsOnClick: true,
+      maxClusterRadius: 80,
+      spiderfyOnMaxZoom: true
+    });
+    map.addLayer(group);
+    vehicleClusters[groupName] = group;
   }
 
 	onDestroy(() => {

@@ -21,7 +21,8 @@
 		"@sveltejs/adapter-auto": "^6.1.1",
 		"@sveltejs/kit": "^2.43.8",
 		"@sveltejs/vite-plugin-svelte": "^6.0.0",
-		"@types/leaflet": "^1.9.20",
+		"@types/leaflet": "^1.9.21",
+		"@types/leaflet.markercluster": "^1.5.6",
 		"@types/node": "^22",
 		"@vitest/browser": "^3.2.3",
 		"eslint": "^9.22.0",
@@ -43,6 +44,7 @@
 		"@mapbox/polyline": "^1.2.1",
 		"@tailwindcss/vite": "^4.1.14",
 		"leaflet": "^1.9.4",
+		"leaflet.markercluster": "^1.5.3",
 		"lucide-svelte": "^0.544.0",
 		"tailwindcss": "^4.1.14",
 		"uuid": "^13.0.0"
