@@ -38,7 +38,3 @@ declare module 'leaflet.markercluster' {
 
   export function markerClusterGroup(options?: MarkerClusterGroupOptions): MarkerClusterGroup;
 }
-//
-// declare module 'leaflet' {
-//   export function markerClusterGroup(options?: import('leaflet.markercluster').MarkerClusterGroupOptions): import('leaflet.markercluster').MarkerClusterGroup;
-// }

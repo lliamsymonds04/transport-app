@@ -21,21 +21,18 @@
 	let L: typeof import('leaflet');
 	let markers: L.Marker[] = [];
 	let polylines: L.Polyline[] = [];
-  let vehicleMarkers: L.Marker[] = [];
   let vehicleUpdateInterval: ReturnType<typeof setInterval>;
-  let vehicleClusters: { [key: string]: MarkerClusterGroup } = {};
+  let clusterGroup: MarkerClusterGroup;
 
 	let { initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 	let primaryColor: string = $state('#3388ff');
 	let secondaryColor: string = $state('#ffffff');
 
 	onMount(async () => {
-    const [leafletModule] = await Promise.all([
-      import('leaflet'),
-      import('leaflet.markercluster')
-    ]);
-    
+    const leafletModule = await import('leaflet');
     L = leafletModule.default;
+    
+    await import('leaflet.markercluster');
 
 		if (mapElement) {
 			map = L.map(mapElement).setView(initialCenter, initialZoom);
@@ -120,6 +117,7 @@
 
   // Live Vehicle Tracking
   function initTracking() {
+    createClusterGroup();
     updateVehicleLocations()
 
     vehicleUpdateInterval = setInterval(() => {
@@ -143,8 +141,7 @@
       data.forEach((vehicle) => {
         addVehicleMarker(vehicle);
       });
-
-      // add the new vehicle markers
+      clusterGroup.refreshClusters();
     } catch {
       console.error('Error fetching vehicle locations');
       clearVehicleMarkers();
@@ -152,8 +149,7 @@
   }
 
   function clearVehicleMarkers() {
-    vehicleMarkers.forEach((marker) => map.removeLayer(marker));
-    vehicleMarkers = [];
+    clusterGroup.clearLayers();
   }
 
   async function addVehicleMarker(vehicle: VehicleInfo) {
@@ -163,29 +159,23 @@
       return;
     }
 
-    // Get or create cluster group
-    const vehicleType = vehicle.vehicleType || 'unknown';
-    if (!vehicleClusters[vehicleType]) {
-      addVehicleClusterGroup(vehicleType);
-    }
-
     const marker = L.marker([vehicle.latitude, vehicle.longitude], { icon })
-      .addTo(map)
       .bindPopup(`Route: ${vehicle.route} <br>Type: ${vehicle.vehicleType}`);
 
-    vehicleMarkers.push(marker);
-    vehicleClusters[vehicleType].addLayer(marker);
+    clusterGroup.addLayer(marker);
   }
 
-  function addVehicleClusterGroup(groupName: string) {
-    const group = L.markerClusterGroup({ 
-      showCoverageOnHover: false, 
+  function createClusterGroup() {
+    clusterGroup = L.markerClusterGroup({
+      showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
-      maxClusterRadius: 80,
-      spiderfyOnMaxZoom: true
+      maxClusterRadius: 50,
+      spiderfyOnMaxZoom: true,
+      removeOutsideVisibleBounds: true,
+      disableClusteringAtZoom: 18,
+      animateAddingMarkers: false,
     });
-    map.addLayer(group);
-    vehicleClusters[groupName] = group;
+    map.addLayer(clusterGroup);
   }
 
 	onDestroy(() => {
