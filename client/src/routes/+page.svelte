@@ -14,6 +14,7 @@
 	let searchValue: MapboxFeature | null = $state(null);
 	let userCoords: LatLngTuple = $state(Brisbane);
 	let locationPermissionGranted = $state(false);
+  let transitRoutes: string[] = $state([]);
   
 	$effect(() => {
 		if (searchValue != null) {
@@ -74,11 +75,12 @@
 		});
 
     // add filter for live vehicles based on transitNames
+    transitRoutes = transitNames;
   }
 </script>
 
 <div class="map-container">
-	<MapView bind:this={mapComponent} onMapReady={handleMapReady} />
+	<MapView bind:this={mapComponent} onMapReady={handleMapReady} transitRoutes={transitRoutes} />
 
 	<SearchBar onSearchSubmit={handleSearch} proximity={userCoords} bind:searchValue />
 

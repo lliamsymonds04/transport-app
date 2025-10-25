@@ -11,6 +11,7 @@
   const url = env.PUBLIC_SERVER_API_URL || 'http://localhost:3000';
 
 	interface Props {
+    transitRoutes: string[];
 		initialCenter?: LatLngTuple;
 		initialZoom?: number;
 		onMapReady?: (map: LeafletMap) => void;
@@ -23,8 +24,10 @@
 	let polylines: L.Polyline[] = [];
   let vehicleUpdateInterval: ReturnType<typeof setInterval>;
   let clusterGroup: MarkerClusterGroup;
+  let routeClusterGroup: MarkerClusterGroup;
+  let vehicleInfoList: VehicleInfo[] = [];
 
-	let { initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
+	let { transitRoutes, initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 	let primaryColor: string = $state('#3388ff');
 	let secondaryColor: string = $state('#ffffff');
 
@@ -57,6 +60,10 @@
     initTracking();
 	});
 
+  $effect(() => {
+    applyRouteFilter(transitRoutes);
+  })
+
 	export function setView(center: LatLngTuple, zoom: number) {
 		map?.setView(center, zoom);
 	}
@@ -65,6 +72,7 @@
 		return map;
 	}
 
+  // Markers
 	export function addMarker(lat: number, lng: number, popupText?: string) {
 		if (map) {
 			const marker = L.marker([lat, lng]).addTo(map);
@@ -86,6 +94,7 @@
 		markers = markers.filter((m) => m !== marker);
 	}
 
+  // Polyline Management
 	export function drawPolyline(encodedLine: string, isDotted: boolean = false) {
 		if (map) {
 			const points = polyline.decode(encodedLine).map(([lat, lng]) => [lat, lng] as LatLngTuple);
@@ -117,7 +126,14 @@
 
   // Live Vehicle Tracking
   function initTracking() {
-    createClusterGroup();
+    //create the cluster group for live tracking
+    clusterGroup = createDefaultClusterGroup();
+    showClusterGroup();
+
+    // create the route cluster group for journeys
+    routeClusterGroup = createDefaultClusterGroup();
+    map.addLayer(routeClusterGroup);
+
     updateVehicleLocations()
 
     vehicleUpdateInterval = setInterval(() => {
@@ -133,14 +149,19 @@
         throw new Error('Failed to fetch vehicle locations');
       }
 
-      const data: VehicleInfo[] = await response.json();
+      vehicleInfoList = await response.json();
 
       clearVehicleMarkers();
 
-      data.forEach((vehicle) => {
-        addVehicleMarker(vehicle);
+      vehicleInfoList.forEach(async (vehicle) => {
+        const marker = await vehicleMarkerHelper(vehicle);
+        if (marker) {
+          clusterGroup.addLayer(marker);
+        }
       });
       clusterGroup.refreshClusters();
+
+      applyRouteFilter(transitRoutes);
     } catch {
       console.error('Error fetching vehicle locations');
       clearVehicleMarkers();
@@ -149,9 +170,10 @@
 
   function clearVehicleMarkers() {
     clusterGroup.clearLayers();
+    routeClusterGroup.clearLayers();
   }
 
-  async function addVehicleMarker(vehicle: VehicleInfo) {
+  async function vehicleMarkerHelper(vehicle: VehicleInfo) {
     const icon = await createVehicleMarker(vehicle, 35);
 
     if (!vehicle.latitude || !vehicle.longitude) {
@@ -161,11 +183,11 @@
     const marker = L.marker([vehicle.latitude, vehicle.longitude], { icon })
       .bindPopup(`Route: ${vehicle.route} <br>Type: ${vehicle.vehicleType}`);
 
-    clusterGroup.addLayer(marker);
+    return marker;
   }
 
-  function createClusterGroup() {
-    clusterGroup = L.markerClusterGroup({
+  function createDefaultClusterGroup() {
+    return L.markerClusterGroup({
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       maxClusterRadius: 50,
@@ -174,8 +196,34 @@
       disableClusteringAtZoom: 18,
       animateAddingMarkers: false,
     });
+  }
 
-    showClusterGroup();
+  function filterVehiclesByRoute(routeNames: string[]) {
+    const filteredResult: number[] = [];
+
+    vehicleInfoList.forEach((vehicle, index) => {
+      if (vehicle.route && routeNames.includes(vehicle.route)) {
+        filteredResult.push(index);
+      }
+    });
+
+    return filteredResult;
+  }
+
+  function applyRouteFilter(routeNames: string[]) {
+    if (!map) return;
+    const filteredIndexes = filterVehiclesByRoute(routeNames);
+    routeClusterGroup.clearLayers();
+
+    filteredIndexes.forEach((index) => {
+      vehicleMarkerHelper(vehicleInfoList[index]).then((marker) => {
+        if (marker) {
+          routeClusterGroup.addLayer(marker);
+        }
+      });
+    });
+
+    routeClusterGroup.refreshClusters();
   }
 
   export function hideClusterGroup() {
@@ -187,7 +235,6 @@
     if (!map) return;
     map.addLayer(clusterGroup);
   }
-
 
 	onDestroy(() => {
 		map?.remove();
