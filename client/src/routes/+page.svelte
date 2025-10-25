@@ -64,15 +64,17 @@
 		}
 	}
 
-	function drawPolylines(polylines: string[], isLineDotted: boolean[]) {
-		if (!mapElement) return;
+  function displayRoute(transitNames: string[], polylines: string[], isLineDotted: boolean[]) {
+    if (!mapElement) return;
 		mapComponent.clearPolylines();
 
 		polylines.forEach((polylineStr, index) => {
 			const dotted = isLineDotted[index];
 			mapComponent.drawPolyline(polylineStr, dotted);
 		});
-	}
+
+    // add filter for live vehicles based on transitNames
+  }
 </script>
 
 <div class="map-container">
@@ -85,7 +87,7 @@
 			destination={searchValue}
 			userLocation={userCoords}
 			permissionGranted={locationPermissionGranted}
-			{drawPolylines}
+			{displayRoute}
 		/>
 	{/if}
 </div>

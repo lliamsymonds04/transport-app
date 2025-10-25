@@ -188,6 +188,7 @@
     map.addLayer(clusterGroup);
   }
 
+
 	onDestroy(() => {
 		map?.remove();
 

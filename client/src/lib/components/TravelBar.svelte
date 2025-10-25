@@ -16,10 +16,10 @@
 		destination: MapboxFeature;
 		userLocation: LatLngTuple;
 		permissionGranted: boolean;
-		drawPolylines: (polylines: string[], isLineDotted: boolean[]) => void;
+    displayRoute: (transitNames: string[], polylines: string[], isLineDotted: boolean[]) => void;
 	}
 
-	let { destination, userLocation, permissionGranted, drawPolylines }: Props = $props();
+	let { destination, userLocation, permissionGranted, displayRoute }: Props = $props();
 
 	let loadingTravelOptions = $state(false);
 	let travelOptions: TransitRoute[] = $state([]);
@@ -77,16 +77,14 @@
 				leg.steps.map((step) => step.travelMode === 'WALK')
 			);
 
-			drawPolylines(polylines, isDotted);
-
-      // add a callback to track the vehicles
-      const routeNames: string[] = [];
+      const transitNames: string[] = [];
       travelOptions[selectionOption].legs.forEach(leg => {
         if (leg.transitDetails) {
-          routeNames.push(leg.transitDetails.shortName);
+          transitNames.push(leg.transitDetails.shortName);
         }
       });
-      console.log(routeNames);
+
+      displayRoute(transitNames, polylines, isDotted);
 		} finally {
 			loadingTravelOptions = false;
 		}
