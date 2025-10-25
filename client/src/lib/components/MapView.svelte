@@ -175,6 +175,17 @@
       disableClusteringAtZoom: 18,
       animateAddingMarkers: false,
     });
+
+    showClusterGroup();
+  }
+
+  export function hideClusterGroup() {
+    if (!map) return;
+    map.removeLayer(clusterGroup);
+  }
+
+  export function showClusterGroup() {
+    if (!map) return;
     map.addLayer(clusterGroup);
   }
 

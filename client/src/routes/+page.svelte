@@ -14,6 +14,18 @@
 	let searchValue: MapboxFeature | null = $state(null);
 	let userCoords: LatLngTuple = $state(Brisbane);
 	let locationPermissionGranted = $state(false);
+  
+	$effect(() => {
+		if (searchValue != null) {
+			// hide live vehicle markers when a search is active
+			mapComponent.hideClusterGroup();
+      console.log('Hiding cluster group due to active search');
+		} else {
+      // show live vehicle markers when no search is active
+      mapComponent.showClusterGroup();
+      console.log('Showing cluster group as no active search');
+    }
+  })
 
 	async function loadUserLocation() {
 		try {
