@@ -136,7 +136,6 @@
       const data: VehicleInfo[] = await response.json();
 
       clearVehicleMarkers();
-      console.log(data.length + ' vehicles tracked');
 
       data.forEach((vehicle) => {
         addVehicleMarker(vehicle);

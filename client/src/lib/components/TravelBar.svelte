@@ -78,6 +78,15 @@
 			);
 
 			drawPolylines(polylines, isDotted);
+
+      // add a callback to track the vehicles
+      const routeNames: string[] = [];
+      travelOptions[selectionOption].legs.forEach(leg => {
+        if (leg.transitDetails) {
+          routeNames.push(leg.transitDetails.shortName);
+        }
+      });
+      console.log(routeNames);
 		} finally {
 			loadingTravelOptions = false;
 		}

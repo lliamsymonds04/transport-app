@@ -20,9 +20,10 @@
 			// hide live vehicle markers when a search is active
 			mapComponent.hideClusterGroup();
 		} else {
-      // show live vehicle markers when no search is active
+      // show live vehicle markers when no search is active and remove polylines/markers
       mapComponent.showClusterGroup();
       mapComponent.clearPolylines();
+      mapComponent.clearMarkers();
     }
   })
 
