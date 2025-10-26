@@ -1,4 +1,4 @@
-import app from './app.js';
+import app from './app';
 
 // Load .env in development if dotenv is installed. Use dynamic import to avoid crashing when dotenv is not present.
 if (process.env.NODE_ENV !== 'production') {

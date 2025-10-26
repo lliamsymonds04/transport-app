@@ -1,5 +1,5 @@
 
-import type { RoutesAPIResponse } from "@shared/routeTypes.js";
+import type { RoutesAPIResponse } from "@shared/routeTypes";
 
 const cache = new Map<string, { route: RoutesAPIResponse, timestamp: number }>();
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes

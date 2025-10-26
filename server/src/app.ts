@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import type { Request, Response } from 'express';
-import type { LatLng } from './lib/getRoute.js';
-import { getRoute } from './lib/getRoute.js';
-import { getVehicleLocations } from './lib/getVehicleLocations.js';
+import type { LatLng } from './lib/getRoute';
+import { getRoute } from './lib/getRoute';
+import { getVehicleLocations } from './lib/getVehicleLocations';
 
 const app = express();
 app.use(express.json());

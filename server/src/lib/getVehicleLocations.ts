@@ -2,7 +2,7 @@ import GTFSRealtimeBindings from "gtfs-realtime-bindings";
 
 const busLocationsUrl = "https://gtfsrt.api.translink.com.au/api/realtime/SEQ/VehiclePositions";
 
-import type { VehicleInfo } from '@shared/vehicleInfo.js';
+import type { VehicleInfo } from '@shared/vehicleInfo';
 
 let cache: { data: VehicleInfo[]; timestamp: number } | null = null;
 const CACHE_DURATION = 60000; // 1 minute in milliseconds
