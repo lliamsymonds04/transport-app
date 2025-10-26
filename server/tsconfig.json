@@ -1,11 +1,15 @@
 {
-  "extends": "../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
-  },
-  "references": [
-    { "path": "../shared" }
-  ],
-  "include": ["src/**/*"]
+	"extends": "../tsconfig.base.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"paths": {
+			"@shared/*": ["../shared/src/*"]
+		}
+	},
+	"include": ["src/**/*"],
+	"references": [{ "path": "../shared" }],
+	"exclude": ["node_modules", "dist"]
 }

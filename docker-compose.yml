@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: transport_app_server
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./server/.env
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    command: npm start

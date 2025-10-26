@@ -1,34 +1,44 @@
-
-# Stage 1 - Build
-FROM node:22-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy server package files
-COPY server/package*.json ./
+# Copy root package files
+COPY package*.json ./
 
+# Copy workspace packages
+COPY shared/package*.json ./shared/
+COPY server/package*.json ./server/
+
+# Install all dependencies
 RUN npm ci
 
-# Copy both server and shared code
-COPY server ./server
+# Copy source files
 COPY shared ./shared
+COPY server ./server
+COPY tsconfig.base.json ./
+
+# Build shared and server
+RUN npm run build
+
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY shared/package*.json ./shared/
+COPY server/package*.json ./server/
+
+# Install production dependencies only
+RUN npm ci --omit=dev
+
+# Copy built files
+COPY --from=builder /app/shared/dist ./shared/dist
+COPY --from=builder /app/server/dist ./server/dist
 
 WORKDIR /app/server
 
-RUN npm run build
-
-# Stage 2 - Run
-FROM node:22-alpine
-WORKDIR /app
-
-COPY --from=builder /app/server/package*.json ./
-RUN npm ci --omit=dev --ignore-scripts
-
-COPY --from=builder /app/server/dist ./dist
-COPY --from=builder /app/shared ./shared
-
-# Remove cache to reduce image size
-RUN npm cache clean --force
-
 EXPOSE 3000
-CMD ["node", "dist/server/src/server.js"]
+
+CMD ["node", "dist/server.js"]

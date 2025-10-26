@@ -1,0 +1,17 @@
+{
+	"name": "transport-app",
+	"private": true,
+	"workspaces": [
+		"server",
+		"client",
+		"shared"
+	],
+	"scripts": {
+		"dev": "npm run dev -w server",
+		"build": "npm run build -w shared && npm run build -w server",
+		"clean": "npm run clean -w shared && npm run clean -w server"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3"
+	}
+}
