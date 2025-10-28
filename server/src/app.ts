@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 
 //cors middleware
-const allowedOrigins = ['http://localhost:5173'];
+const allowedOrigins = ['http://localhost:5173', 'https://bne-transport.vercel.app'];
 app.use(
 	cors({
 		origin: (origin, callback) => {

@@ -1,20 +1,16 @@
 <script lang="ts">
 	import { Ship, Bus, TrainFront } from 'lucide-svelte';
-	import { env } from '$env/dynamic/public';
 	import { v4 as uuidv4 } from 'uuid';
 	import { metersToKilometers } from '$lib/utils/metersToKilometers';
 	import type { LatLngTuple } from 'leaflet';
-	import type { MapboxFeature, MapboxSuggestion, SuggestionRaw } from '$lib/types/mapboxFeature';
-
-	const MapboxApiKey = env.PUBLIC_MAPBOX_TOKEN;
+	import type { MapboxFeature, MapboxSuggestion } from '$lib/types/mapboxFeature';
+	import { fetchMapboxSuggestions, getFeatureDetails } from '$lib/utils/mapSearch';
 
 	interface Props {
 		onSearchSubmit: (feature: MapboxFeature) => void;
 		searchValue: MapboxFeature | null;
 		proximity?: LatLngTuple;
 	}
-
-  
 
 	let { onSearchSubmit, proximity, searchValue = $bindable() }: Props = $props();
 	let query = $state('');
@@ -28,62 +24,14 @@
 	let sessionToken = uuidv4();
 
 	async function fetchSuggestions(searchQuery: string) {
-		if (searchQuery.length < 3) {
-			suggestions = [];
-			return;
-		}
-
 		isLoading = true;
-
 		try {
-			let url =
-				`https://api.mapbox.com/search/searchbox/v1/suggest?q=${encodeURIComponent(searchQuery)}` +
-				`&session_token=${sessionToken}` +
-				`&access_token=${MapboxApiKey}` +
-				`&limit=5` +
-				`&country=au` +
-				`&types=address%2Cpoi`;
-
-			if (proximity) {
-				url += `&proximity=${proximity[1]},${proximity[0]}`;
-			}
-
-			const response = await fetch(url);
-
-			const data = await response.json();
-			suggestions = data.suggestions.map((suggestion: SuggestionRaw) => ({
-				id: suggestion.mapbox_id,
-				name: suggestion.name,
-				address: suggestion.address,
-				distance: suggestion.distance
-			}));
+			suggestions = await fetchMapboxSuggestions(searchQuery, sessionToken, proximity);
 		} catch (error) {
-			console.error('Error fetching suggestions:', error);
 			suggestions = [];
+			console.error('Error fetching suggestions:', error);
 		} finally {
 			isLoading = false;
-		}
-	}
-
-	async function getFeatureDetails(suggestion: MapboxSuggestion): Promise<MapboxFeature> {
-		// Fetch detailed feature information based on the suggestion
-		const url =
-			`https://api.mapbox.com/search/searchbox/v1/retrieve/${suggestion.id}` +
-			`?session_token=${sessionToken}` +
-			`&access_token=${MapboxApiKey}`;
-
-		const response = await fetch(url);
-		const data = await response.json();
-
-		if (data.features && data.features.length > 0) {
-			const feature = data.features[0];
-			return {
-				id: suggestion.id,
-				name: suggestion.name,
-				coordinates: feature.properties.coordinates
-			};
-		} else {
-			throw new Error('No feature details found');
 		}
 	}
 
@@ -93,7 +41,7 @@
 		suggestions = [];
 
 		try {
-			const feature = await getFeatureDetails(suggestion);
+			const feature = await getFeatureDetails(suggestion, sessionToken);
 			searchValue = feature;
 
 			onSearchSubmit(feature);
