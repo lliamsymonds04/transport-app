@@ -5,6 +5,7 @@
 	import { slide } from 'svelte/transition';
 	import { formatRouteResponse } from '$lib/utils/formatRouteResponse';
 	import { formatTime } from '$lib/utils/formatTime';
+	import InlineSearch from './InlineSearch.svelte';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 	import type { LatLngTuple } from 'leaflet';
 	import type { RoutesAPIResponse } from '@shared/routeTypes';
@@ -16,10 +17,12 @@
 		destination: MapboxFeature;
 		userLocation: LatLngTuple;
 		permissionGranted: boolean;
+		sessionToken: string;
 		displayRoute: (transitNames: string[], polylines: string[], isLineDotted: boolean[]) => void;
 	}
 
-	let { destination, userLocation, permissionGranted, displayRoute }: Props = $props();
+	let { destination, userLocation, permissionGranted, sessionToken, displayRoute }: Props =
+		$props();
 
 	let loadingTravelOptions = $state(false);
 	let travelOptions: TransitRoute[] = $state([]);
@@ -103,11 +106,21 @@
 >
 	<div class="flex flex-row gap-2 items-center">
 		<Locate class="text-primary" />
-		<input
-			type="text"
-			class="flex-1 ml-2 bg-transparent text-body font-semibold w-64"
-			placeholder={permissionGranted ? 'Your Location' : 'Enter starting location'}
+		<InlineSearch
+			locationPermissionGranted={permissionGranted}
+			{sessionToken}
+			proximity={destination
+				? ([destination.coordinates.latitude, destination.coordinates.longitude] as LatLngTuple)
+				: undefined}
+			onSearchSubmit={(feature: MapboxFeature) => {
+				console.log('New starting location selected:', feature);
+			}}
 		/>
+		<!-- <input -->
+		<!-- 	type="text" -->
+		<!-- 	class="flex-1 ml-2 bg-transparent text-body font-semibold w-64" -->
+		<!-- 	placeholder={permissionGranted ? 'Your Location' : 'Enter starting location'} -->
+		<!-- /> -->
 	</div>
 
 	<div class="border-border border-b-1 w-full my-2"></div>
