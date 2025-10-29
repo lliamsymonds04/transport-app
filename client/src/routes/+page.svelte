@@ -1,11 +1,12 @@
 <script lang="ts">
 	import 'leaflet/dist/leaflet.css';
-	import type { Map as LeafletMap, LatLngTuple } from 'leaflet';
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import MapView from '$lib/components/MapView.svelte';
 	import TravelBar from '$lib/components/TravelBar.svelte';
+	import { v4 as uuidv4 } from 'uuid';
 	import { getUserLocation } from '$lib/utils/getUserLocation';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
+	import type { Map as LeafletMap, LatLngTuple } from 'leaflet';
 
 	const Brisbane: LatLngTuple = [-27.4685, 153.0239];
 	const defaultZoom = 15;
@@ -14,19 +15,21 @@
 	let searchValue: MapboxFeature | null = $state(null);
 	let userCoords: LatLngTuple = $state(Brisbane);
 	let locationPermissionGranted = $state(false);
-  let transitRoutes: string[] = $state([]);
-  
+	let transitRoutes: string[] = $state([]);
+
+	let sessionToken = uuidv4();
+
 	$effect(() => {
 		if (searchValue != null) {
 			// hide live vehicle markers when a search is active
 			mapComponent.hideClusterGroup();
 		} else {
-      // show live vehicle markers when no search is active and remove polylines/markers
-      mapComponent.showClusterGroup();
-      mapComponent.clearPolylines();
-      mapComponent.clearMarkers();
-    }
-  })
+			// show live vehicle markers when no search is active and remove polylines/markers
+			mapComponent.showClusterGroup();
+			mapComponent.clearPolylines();
+			mapComponent.clearMarkers();
+		}
+	});
 
 	async function loadUserLocation() {
 		try {
@@ -65,8 +68,8 @@
 		}
 	}
 
-  function displayRoute(transitNames: string[], polylines: string[], isLineDotted: boolean[]) {
-    if (!mapElement) return;
+	function displayRoute(transitNames: string[], polylines: string[], isLineDotted: boolean[]) {
+		if (!mapElement) return;
 		mapComponent.clearPolylines();
 
 		polylines.forEach((polylineStr, index) => {
@@ -74,15 +77,15 @@
 			mapComponent.drawPolyline(polylineStr, dotted);
 		});
 
-    // add filter for live vehicles based on transitNames
-    transitRoutes = transitNames;
-  }
+		// add filter for live vehicles based on transitNames
+		transitRoutes = transitNames;
+	}
 </script>
 
 <div class="map-container">
-	<MapView bind:this={mapComponent} onMapReady={handleMapReady} transitRoutes={transitRoutes} />
+	<MapView bind:this={mapComponent} onMapReady={handleMapReady} {transitRoutes} />
 
-	<SearchBar onSearchSubmit={handleSearch} proximity={userCoords} bind:searchValue />
+	<SearchBar onSearchSubmit={handleSearch} proximity={userCoords} {sessionToken} bind:searchValue />
 
 	{#if searchValue}
 		<TravelBar

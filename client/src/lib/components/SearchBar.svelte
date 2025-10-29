@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Ship, Bus, TrainFront } from 'lucide-svelte';
-	import { v4 as uuidv4 } from 'uuid';
 	import { metersToKilometers } from '$lib/utils/metersToKilometers';
 	import type { LatLngTuple } from 'leaflet';
 	import type { MapboxFeature, MapboxSuggestion } from '$lib/types/mapboxFeature';
@@ -9,10 +8,11 @@
 	interface Props {
 		onSearchSubmit: (feature: MapboxFeature) => void;
 		searchValue: MapboxFeature | null;
+		sessionToken: string;
 		proximity?: LatLngTuple;
 	}
 
-	let { onSearchSubmit, proximity, searchValue = $bindable() }: Props = $props();
+	let { onSearchSubmit, sessionToken, proximity, searchValue = $bindable() }: Props = $props();
 	let query = $state('');
 	let suggestions = $state<MapboxSuggestion[]>([]);
 	let isLoading = $state(false);
@@ -20,8 +20,6 @@
 	let showSuggestions = $derived(suggestions.length > 0);
 	let selectedIndex = $state(-1);
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-
-	let sessionToken = uuidv4();
 
 	async function fetchSuggestions(searchQuery: string) {
 		isLoading = true;

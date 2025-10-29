@@ -16,7 +16,7 @@
 		destination: MapboxFeature;
 		userLocation: LatLngTuple;
 		permissionGranted: boolean;
-    displayRoute: (transitNames: string[], polylines: string[], isLineDotted: boolean[]) => void;
+		displayRoute: (transitNames: string[], polylines: string[], isLineDotted: boolean[]) => void;
 	}
 
 	let { destination, userLocation, permissionGranted, displayRoute }: Props = $props();
@@ -77,14 +77,14 @@
 				leg.steps.map((step) => step.travelMode === 'WALK')
 			);
 
-      const transitNames: string[] = [];
-      travelOptions[selectionOption].legs.forEach(leg => {
-        if (leg.transitDetails) {
-          transitNames.push(leg.transitDetails.shortName);
-        }
-      });
+			const transitNames: string[] = [];
+			travelOptions[selectionOption].legs.forEach((leg) => {
+				if (leg.transitDetails) {
+					transitNames.push(leg.transitDetails.shortName);
+				}
+			});
 
-      displayRoute(transitNames, polylines, isDotted);
+			displayRoute(transitNames, polylines, isDotted);
 		} finally {
 			loadingTravelOptions = false;
 		}
