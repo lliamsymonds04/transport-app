@@ -54,40 +54,42 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Tab' && suggestionMatchesInput()) {
-			event.preventDefault();
-			completeSuggestion();
-		} else if (event.key === 'Enter') {
-			handleSubmit(event);
+		if (event.key === 'Tab' || event.key === 'Enter') {
+			if (suggestionMatchesInput()) {
+				event.preventDefault();
+				completeSuggestion();
+				handleSubmit(event);
+			}
 		}
 	}
 
 	function handleInput(event: Event) {
 		const input = event.target as HTMLInputElement;
 		value = input.value;
-		fetchSuggestion(value);
+
+		if (value.length == 0) {
+			suggestion = null;
+		} else if (value.length > 0) {
+			fetchSuggestion(value);
+		}
 	}
 </script>
 
-<!-- <input -->
-<!-- 	type="text" -->
-<!-- 	class="flex-1 ml-2 bg-transparent text-body font-semibold w-64" -->
-<!-- 	placeholder={locationPermissionGranted ? 'Your Location' : 'Enter starting location'} -->
-<!-- /> -->
-
-<div class="relative flex-1 ml bg-transparent text-body font-semibold w-64">
+<div class="relative flex-1 ml bg-transparent w-64">
 	<!-- Ghost Input for Suggestion -->
 	<input
 		type="text"
-		value={value + suggestion?.name.slice(value.length)}
+		value={suggestion && suggestionMatchesInput()
+			? value + suggestion.name.slice(value.length)
+			: ''}
 		disabled
-		class="absolute top-0 left-0 w-full bg-transparent text-gray-400 pointer-events-none"
+		class="w-full border p-2 bg-transparent text-gray-400 pointer-events-none absolute"
 	/>
 
 	<input
 		type="text"
 		bind:value
-		class="w-full border p-2 bg-transparent text-black relative z-10"
+		class="w-full border p-2 bg-transparent text-body relative z-10"
 		oninput={handleInput}
 		onkeydown={handleKeydown}
 		placeholder={locationPermissionGranted ? 'Your Location' : 'Enter starting location'}

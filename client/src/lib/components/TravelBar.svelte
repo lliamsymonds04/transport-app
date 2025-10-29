@@ -114,13 +114,9 @@
 				: undefined}
 			onSearchSubmit={(feature: MapboxFeature) => {
 				console.log('New starting location selected:', feature);
+				fetchTravelOptions([feature.coordinates.latitude, feature.coordinates.longitude]);
 			}}
 		/>
-		<!-- <input -->
-		<!-- 	type="text" -->
-		<!-- 	class="flex-1 ml-2 bg-transparent text-body font-semibold w-64" -->
-		<!-- 	placeholder={permissionGranted ? 'Your Location' : 'Enter starting location'} -->
-		<!-- /> -->
 	</div>
 
 	<div class="border-border border-b-1 w-full my-2"></div>

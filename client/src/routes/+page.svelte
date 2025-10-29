@@ -92,6 +92,7 @@
 			destination={searchValue}
 			userLocation={userCoords}
 			permissionGranted={locationPermissionGranted}
+			{sessionToken}
 			{displayRoute}
 		/>
 	{/if}
