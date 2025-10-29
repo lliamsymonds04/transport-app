@@ -74,7 +74,7 @@
 
 		polylines.forEach((polylineStr, index) => {
 			const dotted = isLineDotted[index];
-			mapComponent.drawPolyline(polylineStr, dotted);
+			mapComponent.drawPolyline(polylineStr, dotted, index == 0);
 		});
 
 		// add filter for live vehicles based on transitNames

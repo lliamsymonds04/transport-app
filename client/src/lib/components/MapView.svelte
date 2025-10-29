@@ -1,17 +1,17 @@
 <script lang="ts">
 	import 'leaflet/dist/leaflet.css';
-  import 'leaflet.markercluster/dist/MarkerCluster.css';
-  import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+	import 'leaflet.markercluster/dist/MarkerCluster.css';
+	import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 	import { onDestroy, onMount } from 'svelte';
 	import type { Map as LeafletMap, LatLngTuple, MarkerClusterGroup } from 'leaflet';
 	import polyline from '@mapbox/polyline';
 	import { env } from '$env/dynamic/public';
-  import { createVehicleMarker } from '$lib/utils/VehicleMarker.js';
-  import type { VehicleInfo } from '@shared/vehicleInfo.js';
-  const url = env.PUBLIC_SERVER_API_URL || 'http://localhost:3000';
+	import { createVehicleMarker } from '$lib/utils/VehicleMarker.js';
+	import type { VehicleInfo } from '@shared/vehicleInfo.js';
+	const url = env.PUBLIC_SERVER_API_URL || 'http://localhost:3000';
 
 	interface Props {
-    transitRoutes: string[];
+		transitRoutes: string[];
 		initialCenter?: LatLngTuple;
 		initialZoom?: number;
 		onMapReady?: (map: LeafletMap) => void;
@@ -22,20 +22,21 @@
 	let L: typeof import('leaflet');
 	let markers: L.Marker[] = [];
 	let polylines: L.Polyline[] = [];
-  let vehicleUpdateInterval: ReturnType<typeof setInterval>;
-  let clusterGroup: MarkerClusterGroup;
-  let routeClusterGroup: MarkerClusterGroup;
-  let vehicleInfoList: VehicleInfo[] = [];
+	let circles: L.Circle[] = [];
+	let vehicleUpdateInterval: ReturnType<typeof setInterval>;
+	let clusterGroup: MarkerClusterGroup;
+	let routeClusterGroup: MarkerClusterGroup;
+	let vehicleInfoList: VehicleInfo[] = [];
 
 	let { transitRoutes, initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 	let primaryColor: string = $state('#3388ff');
 	let secondaryColor: string = $state('#ffffff');
 
 	onMount(async () => {
-    const leafletModule = await import('leaflet');
-    L = leafletModule.default;
-    
-    await import('leaflet.markercluster');
+		const leafletModule = await import('leaflet');
+		L = leafletModule.default;
+
+		await import('leaflet.markercluster');
 
 		if (mapElement) {
 			map = L.map(mapElement).setView(initialCenter, initialZoom);
@@ -57,12 +58,12 @@
 			.trim();
 		onMapReady?.(map);
 
-    initTracking();
+		initTracking();
 	});
 
-  $effect(() => {
-    applyRouteFilter(transitRoutes);
-  })
+	$effect(() => {
+		applyRouteFilter(transitRoutes);
+	});
 
 	export function setView(center: LatLngTuple, zoom: number) {
 		map?.setView(center, zoom);
@@ -72,7 +73,7 @@
 		return map;
 	}
 
-  // Markers
+	// Markers
 	export function addMarker(lat: number, lng: number, popupText?: string) {
 		if (map) {
 			const marker = L.marker([lat, lng]).addTo(map);
@@ -94,12 +95,31 @@
 		markers = markers.filter((m) => m !== marker);
 	}
 
-  // Polyline Management
-	export function drawPolyline(encodedLine: string, isDotted: boolean = false) {
+	// Polyline Management
+	export function addCircleMarker(
+		lat: number,
+		lng: number,
+		radius: number,
+		color: string = secondaryColor
+	) {
+		if (map) {
+			const circle = L.circle([lat, lng], {
+				color: color,
+				fillColor: color,
+				fillOpacity: 0.5,
+				radius: radius
+			}).addTo(map);
+			circles.push(circle);
+			return circle;
+		}
+	}
+
+	export function drawPolyline(encodedLine: string, isDotted = false, isFirst = false) {
 		if (map) {
 			const points = polyline.decode(encodedLine).map(([lat, lng]) => [lat, lng] as LatLngTuple);
+			const color = isDotted ? secondaryColor : primaryColor;
 			const line = L.polyline(points, {
-				color: isDotted ? secondaryColor : primaryColor,
+				color: color,
 				dashArray: isDotted ? '5, 10' : '',
 				opacity: 0.8,
 				weight: 5,
@@ -107,6 +127,15 @@
 				lineCap: 'round'
 			}).addTo(map);
 			polylines.push(line);
+
+			if (isFirst) {
+				addCircleMarker(points[0][0], points[0][1], 8, color); // Start point
+			}
+
+			if (!isDotted) {
+				//addCircleMarker(points[0][0], points[0][1], 8, color); // Start point
+				addCircleMarker(points[points.length - 1][0], points[points.length - 1][1], 8, color); // End point
+			}
 		}
 	}
 
@@ -120,129 +149,132 @@
 	export function clearPolylines() {
 		if (map && polylines.length > 0) {
 			polylines.forEach((line) => map.removeLayer(line));
+			circles.forEach((circle) => map.removeLayer(circle));
 			polylines.length = 0;
+			circles.length = 0;
 		}
 	}
 
-  // Live Vehicle Tracking
-  function initTracking() {
-    //create the cluster group for live tracking
-    clusterGroup = createDefaultClusterGroup();
-    showClusterGroup();
+	// Live Vehicle Tracking
+	function initTracking() {
+		//create the cluster group for live tracking
+		clusterGroup = createDefaultClusterGroup();
+		showClusterGroup();
 
-    // create the route cluster group for journeys
-    routeClusterGroup = createDefaultClusterGroup();
-    map.addLayer(routeClusterGroup);
+		// create the route cluster group for journeys
+		routeClusterGroup = createDefaultClusterGroup();
+		map.addLayer(routeClusterGroup);
 
-    updateVehicleLocations()
+		updateVehicleLocations();
 
-    vehicleUpdateInterval = setInterval(() => {
-      updateVehicleLocations();
-    }, 60000);
-  }
+		vehicleUpdateInterval = setInterval(() => {
+			updateVehicleLocations();
+		}, 60000);
+	}
 
-  async function updateVehicleLocations() {
-    try {
-      const response = await fetch(`${url}/vehicle-locations`);
+	async function updateVehicleLocations() {
+		try {
+			const response = await fetch(`${url}/vehicle-locations`);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch vehicle locations');
-      }
+			if (!response.ok) {
+				throw new Error('Failed to fetch vehicle locations');
+			}
 
-      vehicleInfoList = await response.json();
+			vehicleInfoList = await response.json();
 
-      clearVehicleMarkers();
+			clearVehicleMarkers();
 
-      vehicleInfoList.forEach(async (vehicle) => {
-        const marker = await vehicleMarkerHelper(vehicle);
-        if (marker) {
-          clusterGroup.addLayer(marker);
-        }
-      });
-      clusterGroup.refreshClusters();
+			vehicleInfoList.forEach(async (vehicle) => {
+				const marker = await vehicleMarkerHelper(vehicle);
+				if (marker) {
+					clusterGroup.addLayer(marker);
+				}
+			});
+			clusterGroup.refreshClusters();
 
-      applyRouteFilter(transitRoutes);
-    } catch {
-      console.error('Error fetching vehicle locations');
-      clearVehicleMarkers();
-    }
-  }
+			applyRouteFilter(transitRoutes);
+		} catch {
+			console.error('Error fetching vehicle locations');
+			clearVehicleMarkers();
+		}
+	}
 
-  function clearVehicleMarkers() {
-    clusterGroup.clearLayers();
-    routeClusterGroup.clearLayers();
-  }
+	function clearVehicleMarkers() {
+		clusterGroup.clearLayers();
+		routeClusterGroup.clearLayers();
+	}
 
-  async function vehicleMarkerHelper(vehicle: VehicleInfo) {
-    const icon = await createVehicleMarker(vehicle, 35);
+	async function vehicleMarkerHelper(vehicle: VehicleInfo) {
+		const icon = await createVehicleMarker(vehicle, 35);
 
-    if (!vehicle.latitude || !vehicle.longitude) {
-      return;
-    }
+		if (!vehicle.latitude || !vehicle.longitude) {
+			return;
+		}
 
-    const marker = L.marker([vehicle.latitude, vehicle.longitude], { icon })
-      .bindPopup(`Route: ${vehicle.route} <br>Type: ${vehicle.vehicleType}`);
+		const marker = L.marker([vehicle.latitude, vehicle.longitude], { icon }).bindPopup(
+			`Route: ${vehicle.route} <br>Type: ${vehicle.vehicleType}`
+		);
 
-    return marker;
-  }
+		return marker;
+	}
 
-  function createDefaultClusterGroup() {
-    return L.markerClusterGroup({
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true,
-      maxClusterRadius: 50,
-      spiderfyOnMaxZoom: true,
-      removeOutsideVisibleBounds: true,
-      disableClusteringAtZoom: 18,
-      animateAddingMarkers: false,
-    });
-  }
+	function createDefaultClusterGroup() {
+		return L.markerClusterGroup({
+			showCoverageOnHover: false,
+			zoomToBoundsOnClick: true,
+			maxClusterRadius: 50,
+			spiderfyOnMaxZoom: true,
+			removeOutsideVisibleBounds: true,
+			disableClusteringAtZoom: 18,
+			animateAddingMarkers: false
+		});
+	}
 
-  function filterVehiclesByRoute(routeNames: string[]) {
-    const filteredResult: number[] = [];
+	function filterVehiclesByRoute(routeNames: string[]) {
+		const filteredResult: number[] = [];
 
-    vehicleInfoList.forEach((vehicle, index) => {
-      if (vehicle.route && routeNames.includes(vehicle.route)) {
-        filteredResult.push(index);
-      }
-    });
+		vehicleInfoList.forEach((vehicle, index) => {
+			if (vehicle.route && routeNames.includes(vehicle.route)) {
+				filteredResult.push(index);
+			}
+		});
 
-    return filteredResult;
-  }
+		return filteredResult;
+	}
 
-  function applyRouteFilter(routeNames: string[]) {
-    if (!map) return;
-    const filteredIndexes = filterVehiclesByRoute(routeNames);
-    routeClusterGroup.clearLayers();
+	function applyRouteFilter(routeNames: string[]) {
+		if (!map) return;
+		const filteredIndexes = filterVehiclesByRoute(routeNames);
+		routeClusterGroup.clearLayers();
 
-    filteredIndexes.forEach((index) => {
-      vehicleMarkerHelper(vehicleInfoList[index]).then((marker) => {
-        if (marker) {
-          routeClusterGroup.addLayer(marker);
-        }
-      });
-    });
+		filteredIndexes.forEach((index) => {
+			vehicleMarkerHelper(vehicleInfoList[index]).then((marker) => {
+				if (marker) {
+					routeClusterGroup.addLayer(marker);
+				}
+			});
+		});
 
-    routeClusterGroup.refreshClusters();
-  }
+		routeClusterGroup.refreshClusters();
+	}
 
-  export function hideClusterGroup() {
-    if (!map) return;
-    map.removeLayer(clusterGroup);
-  }
+	export function hideClusterGroup() {
+		if (!map) return;
+		map.removeLayer(clusterGroup);
+	}
 
-  export function showClusterGroup() {
-    if (!map) return;
-    map.addLayer(clusterGroup);
-  }
+	export function showClusterGroup() {
+		if (!map) return;
+		map.addLayer(clusterGroup);
+	}
 
 	onDestroy(() => {
 		map?.remove();
 
-    // if the interval is set clear it
-    if (vehicleUpdateInterval) {
-      clearInterval(vehicleUpdateInterval);
-    }
+		// if the interval is set clear it
+		if (vehicleUpdateInterval) {
+			clearInterval(vehicleUpdateInterval);
+		}
 	});
 </script>
 

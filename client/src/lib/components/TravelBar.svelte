@@ -68,8 +68,6 @@
 			travelOptions = data.routes.map((route) => formatRouteResponse(route));
 			selectionOption = 0; // Automatically select the first option
 
-			console.log('Fetched travel options:', travelOptions);
-
 			const route0 = data.routes[0];
 
 			const polylines = route0.legs.flatMap((leg) =>
