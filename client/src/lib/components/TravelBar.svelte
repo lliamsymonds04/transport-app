@@ -27,6 +27,7 @@
 
 	let loadingTravelOptions = $state(false);
 	let travelOptions: TransitRoute[] = $state([]);
+	let startLocation: MapboxFeature | undefined = $state();
 	let selectionOption: number | null = $state(null);
 	let selectedRoute: TransitRoute | null = $derived.by(() => {
 		return selectionOption !== null ? travelOptions[selectionOption] : null;
@@ -80,9 +81,7 @@
 			}
 
 			const data = (await response.json()) as RoutesAPIResponse;
-			console.log('Fetched route data:', data);
 			travelOptions = data.routes.map((route) => formatRouteResponse(route));
-			console.log('Fetched travel options:', travelOptions);
 			selectionOption = 0; // Automatically select the first option
 
 			const route0 = data.routes[0];
@@ -124,23 +123,27 @@
 		userSelectedTime = `${pad(now.getHours())}:${pad(roundedMinutes % 60)}`;
 	}
 
+	function getStart(): LatLngTuple {
+		return startLocation
+			? [startLocation.coordinates.latitude, startLocation.coordinates.longitude]
+			: userLocation;
+	}
+
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 	function handleTimeChange() {
-		//const input = event.target as HTMLInputElement;
-
 		clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(() => {
 			if (userLocation && destination) {
-				fetchTravelOptions(userLocation);
+				fetchTravelOptions(getStart());
 			}
-		}, 1000);
+		}, 500);
 	}
 
 	onMount(() => {
 		mode = 'leaveNow';
 		userSelectedTime = '';
 		if (destination && userLocation) {
-			fetchTravelOptions(userLocation);
+			fetchTravelOptions(getStart());
 		}
 	});
 </script>
@@ -157,8 +160,8 @@
 			proximity={destination
 				? ([destination.coordinates.latitude, destination.coordinates.longitude] as LatLngTuple)
 				: undefined}
+			bind:startLocation
 			onSearchSubmit={(feature: MapboxFeature) => {
-				console.log('New starting location selected:', feature);
 				fetchTravelOptions([feature.coordinates.latitude, feature.coordinates.longitude]);
 			}}
 		/>

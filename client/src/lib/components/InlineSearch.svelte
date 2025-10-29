@@ -7,10 +7,17 @@
 		onSearchSubmit: (feature: MapboxFeature) => void;
 		sessionToken: string;
 		locationPermissionGranted: boolean;
+		startLocation?: MapboxFeature;
 		proximity?: LatLngTuple;
 	}
 
-	let { onSearchSubmit, proximity, sessionToken, locationPermissionGranted }: Props = $props();
+	let {
+		onSearchSubmit,
+		proximity,
+		sessionToken,
+		locationPermissionGranted,
+		startLocation = $bindable()
+	}: Props = $props();
 
 	let suggestion = $state<MapboxSuggestion | null>();
 	let value = $state('');
@@ -49,6 +56,7 @@
 		if (suggestionMatchesInput()) {
 			let feature = await getFeatureDetails(suggestion, sessionToken);
 
+			startLocation = feature;
 			onSearchSubmit(feature);
 		}
 	}

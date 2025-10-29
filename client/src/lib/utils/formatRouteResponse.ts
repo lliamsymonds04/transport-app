@@ -8,7 +8,6 @@ export function formatRouteResponse(response: Route): TransitRoute {
 		const durationInSeconds = parseInt(step.staticDuration.replace('s', ''));
 		if (step.travelMode === 'TRANSIT') {
 			const { transitDetails } = step;
-			console.log('transitDetails:', transitDetails);
 			return {
 				transitType: 'Transit',
 				arrivalTime: new Date(transitDetails!.stopDetails.arrivalTime),
@@ -29,7 +28,6 @@ export function formatRouteResponse(response: Route): TransitRoute {
 			};
 		}
 	});
-	console.log('lefts:', legs);
 
 	const mergedLegs: DisplayRouteLeg[] = [];
 	let i = 0;
