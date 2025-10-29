@@ -13,7 +13,13 @@ export async function getRoute(
 	departureTime?: Date,
 	arriveTime?: Date
 ): Promise<RoutesAPIResponse> {
-	const cacheKey = `${start.latitude},${start.longitude},${end.latitude},${end.longitude}`;
+	let cacheKey = `${start.latitude},${start.longitude},${end.latitude},${end.longitude}`;
+	if (departureTime) {
+		cacheKey += `,departAt:${departureTime.toISOString()}`;
+	} else if (arriveTime) {
+		cacheKey += `,arriveAt:${arriveTime.toISOString()}`;
+	}
+
 	const cachedresponse = get(cacheKey);
 	if (cachedresponse) {
 		return cachedresponse;

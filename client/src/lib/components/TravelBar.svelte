@@ -80,7 +80,9 @@
 			}
 
 			const data = (await response.json()) as RoutesAPIResponse;
+			console.log('Fetched route data:', data);
 			travelOptions = data.routes.map((route) => formatRouteResponse(route));
+			console.log('Fetched travel options:', travelOptions);
 			selectionOption = 0; // Automatically select the first option
 
 			const route0 = data.routes[0];
