@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { SvelteDate } from 'svelte/reactivity';
 	import { env } from '$env/dynamic/public';
 	import { Locate, Footprints, Bus } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
@@ -30,6 +31,7 @@
 	let selectedRoute: TransitRoute | null = $derived.by(() => {
 		return selectionOption !== null ? travelOptions[selectionOption] : null;
 	});
+
 	let arriveTime: string | null = $derived.by(() => {
 		if (selectedRoute && selectedRoute.legs.length > 0) {
 			const lastLeg = selectedRoute.legs[selectedRoute.legs.length - 1];
@@ -45,6 +47,13 @@
 		}
 		return null;
 	});
+
+	// Time selection logic
+	type Mode = 'leaveNow' | 'depart' | 'arrive';
+	let mode = $state<Mode>('leaveNow');
+	let userSelectedTime = $state('');
+
+	const pad = (n: number) => n.toString().padStart(2, '0');
 
 	async function fetchTravelOptions(start: LatLngTuple) {
 		loadingTravelOptions = true;
@@ -91,6 +100,22 @@
 		}
 	}
 
+	function handleModeChange(event: Event) {
+		mode = (event.target as HTMLSelectElement).value as Mode;
+
+		if (mode === 'leaveNow') {
+			userSelectedTime = '';
+			return;
+		}
+
+		let now = new SvelteDate();
+		if (mode == 'arrive') {
+			now.setHours(now.getHours() + 1);
+		}
+		const roundedMinutes = Math.round(now.getMinutes() / 5) * 5;
+		userSelectedTime = `${pad(now.getHours())}:${pad(roundedMinutes % 60)}`;
+	}
+
 	onMount(() => {
 		if (destination && userLocation) {
 			fetchTravelOptions(userLocation);
@@ -115,6 +140,19 @@
 				fetchTravelOptions([feature.coordinates.latitude, feature.coordinates.longitude]);
 			}}
 		/>
+	</div>
+
+	<!-- Time selection -->
+	<div class="flex flex-row items-center gap-2 mt-4">
+		<select id="mode" onchange={handleModeChange} bind:value={mode}>
+			<option value="leaveNow">Leave now</option>
+			<option value="depart">Depart at</option>
+			<option value="arrive">Arrive by</option>
+		</select>
+
+		{#if mode !== 'leaveNow'}
+			<input type="time" bind:value={userSelectedTime} step="300" />
+		{/if}
 	</div>
 
 	<div class="border-border border-b-1 w-full my-2"></div>
