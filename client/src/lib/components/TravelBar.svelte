@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { SvelteDate } from 'svelte/reactivity';
+	import { SvelteDate, SvelteURLSearchParams } from 'svelte/reactivity';
 	import { env } from '$env/dynamic/public';
 	import { Locate, Footprints, Bus } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import { formatRouteResponse } from '$lib/utils/formatRouteResponse';
-	import { formatTime } from '$lib/utils/formatTime';
+	import { formatTime, getISOTimeFromHHMM } from '$lib/utils/formatTime';
 	import InlineSearch from './InlineSearch.svelte';
 	import type { MapboxFeature } from '$lib/types/mapboxFeature';
 	import type { LatLngTuple } from 'leaflet';
@@ -60,12 +60,18 @@
 
 		try {
 			// join the coords to the url
-			const params = new URLSearchParams({
+			const params = new SvelteURLSearchParams({
 				startLat: start[0].toString(),
 				startLng: start[1].toString(),
 				endLat: destination.coordinates.latitude.toString(),
 				endLng: destination.coordinates.longitude.toString()
 			});
+
+			if (mode == 'depart') {
+				params.append('departureTime', getISOTimeFromHHMM(userSelectedTime));
+			} else if (mode == 'arrive') {
+				params.append('arrivalTime', getISOTimeFromHHMM(userSelectedTime));
+			}
 
 			const response = await fetch(`${url}/route?${params.toString()}`);
 
@@ -116,7 +122,21 @@
 		userSelectedTime = `${pad(now.getHours())}:${pad(roundedMinutes % 60)}`;
 	}
 
+	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+	function handleTimeChange() {
+		//const input = event.target as HTMLInputElement;
+
+		clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(() => {
+			if (userLocation && destination) {
+				fetchTravelOptions(userLocation);
+			}
+		}, 1000);
+	}
+
 	onMount(() => {
+		mode = 'leaveNow';
+		userSelectedTime = '';
 		if (destination && userLocation) {
 			fetchTravelOptions(userLocation);
 		}
@@ -151,7 +171,7 @@
 		</select>
 
 		{#if mode !== 'leaveNow'}
-			<input type="time" bind:value={userSelectedTime} step="300" />
+			<input type="time" bind:value={userSelectedTime} onchange={handleTimeChange} step="300" />
 		{/if}
 	</div>
 

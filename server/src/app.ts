@@ -28,7 +28,7 @@ app.get('/', (_: Request, res: Response) => {
 });
 
 app.get('/route', async (req: Request, res: Response) => {
-	const { startLat, startLng, endLat, endLng } = req.query;
+	const { startLat, startLng, endLat, endLng, departureTime, arrivalTime } = req.query;
 	if (!startLat || !startLng || !endLat || !endLng) {
 		return res.status(400).json({ error: 'Missing start or end query parameters' });
 	}
@@ -43,8 +43,31 @@ app.get('/route', async (req: Request, res: Response) => {
 		longitude: parseFloat(endLng as string)
 	};
 
+	let departDate: Date | undefined;
+	let arriveDate: Date | undefined;
+
+	// Parse optional departure/arrival times if provided
+	if (departureTime) {
+		departDate = new Date(departureTime as string);
+		if (isNaN(departDate.getTime())) {
+			return res.status(400).json({ error: 'Invalid departureTime format' });
+		}
+	}
+
+	if (arrivalTime) {
+		arriveDate = new Date(arrivalTime as string);
+		if (isNaN(arriveDate.getTime())) {
+			return res.status(400).json({ error: 'Invalid arrivalTime format' });
+		}
+	}
+
+	// Ensure only one is provided
+	if (departDate && arriveDate) {
+		return res.status(400).json({ error: 'Specify either departureTime or arrivalTime, not both' });
+	}
+
 	try {
-		const route = await getRoute(startCoords, endCoords);
+		const route = await getRoute(startCoords, endCoords, departDate, arriveDate);
 		res.json(route);
 	} catch (error) {
 		console.error('Error fetching route:', error);

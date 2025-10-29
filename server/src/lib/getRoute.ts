@@ -7,7 +7,12 @@ export interface LatLng {
 	longitude: number;
 }
 
-export async function getRoute(start: LatLng, end: LatLng): Promise<RoutesAPIResponse> {
+export async function getRoute(
+	start: LatLng,
+	end: LatLng,
+	departureTime?: Date,
+	arriveTime?: Date
+): Promise<RoutesAPIResponse> {
 	const cacheKey = `${start.latitude},${start.longitude},${end.latitude},${end.longitude}`;
 	const cachedresponse = get(cacheKey);
 	if (cachedresponse) {
@@ -20,31 +25,38 @@ export async function getRoute(start: LatLng, end: LatLng): Promise<RoutesAPIRes
 		throw new Error('GOOGLE_MAPS_API_KEY is not set in environment variables');
 	}
 
+	const body: Record<string, any> = {
+		origin: {
+			location: {
+				latLng: start
+			}
+		},
+		destination: {
+			location: {
+				latLng: end
+			}
+		},
+		travelMode: 'TRANSIT',
+		// computeAlternativeRoutes: false,
+		languageCode: 'en-AU',
+		units: 'METRIC'
+	};
+
+	if (departureTime) {
+		body.departureTime = departureTime.toISOString();
+	} else if (arriveTime) {
+		body.arrivalTime = arriveTime.toISOString();
+	}
+
 	const resp = await fetch(RouteEndpoint, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 			'X-Goog-Api-Key': api_key,
-			//'X-Goog-FieldMask': '*'
 			'X-Goog-FieldMask':
 				'routes.legs.distanceMeters,routes.legs.duration,routes.legs.steps.staticDuration,routes.legs.steps.travelMode,routes.legs.steps.polyline,routes.legs.steps.transitDetails'
 		},
-		body: JSON.stringify({
-			origin: {
-				location: {
-					latLng: start
-				}
-			},
-			destination: {
-				location: {
-					latLng: end
-				}
-			},
-			travelMode: 'TRANSIT',
-			// computeAlternativeRoutes: false,
-			languageCode: 'en-AU',
-			units: 'METRIC'
-		})
+		body: JSON.stringify(body)
 	});
 
 	if (!resp.ok) {
