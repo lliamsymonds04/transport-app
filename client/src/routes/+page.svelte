@@ -72,9 +72,15 @@
 		if (!mapElement) return;
 		mapComponent.clearPolylines();
 
+		let transitIndex = 0;
 		polylines.forEach((polylineStr, index) => {
 			const dotted = isLineDotted[index];
-			mapComponent.drawPolyline(polylineStr, dotted, index == 0);
+			let name = '';
+			if (!dotted && transitIndex < transitNames.length) {
+				name = transitNames[transitIndex];
+				transitIndex++;
+			}
+			mapComponent.drawPolyline(polylineStr, name, dotted, index == 0);
 		});
 
 		// add filter for live vehicles based on transitNames

@@ -114,7 +114,12 @@
 		}
 	}
 
-	export function drawPolyline(encodedLine: string, isDotted = false, isFirst = false) {
+	export function drawPolyline(
+		encodedLine: string,
+		name?: string,
+		isDotted = false,
+		isFirst = false
+	) {
 		if (map) {
 			const points = polyline.decode(encodedLine).map(([lat, lng]) => [lat, lng] as LatLngTuple);
 			const color = isDotted ? secondaryColor : primaryColor;
@@ -122,11 +127,19 @@
 				color: color,
 				dashArray: isDotted ? '5, 10' : '',
 				opacity: 0.8,
-				weight: 5,
+				weight: 6,
 				lineJoin: 'round',
 				lineCap: 'round'
 			}).addTo(map);
 			polylines.push(line);
+
+			if (name) {
+				line.bindTooltip(name, {
+					permanent: false,
+					sticky: true,
+					className: 'polyline-tooltip'
+				});
+			}
 
 			if (isFirst) {
 				addCircleMarker(points[0][0], points[0][1], 8, color); // Start point
