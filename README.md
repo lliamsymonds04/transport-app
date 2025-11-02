@@ -2,7 +2,7 @@
 
 A real-time public transit tracking and route planning application built with SvelteKit and Express. Track live vehicle locations, plan multi-modal journeys, and visualize routes on an interactive map.
 
-![Screenshot](assets/website-screenshot.png)
+[![Screenshot](assets/website-screenshot.png)](https://bne-transport.vercel.app/)
 
 ## Features
 
@@ -28,8 +28,9 @@ A real-time public transit tracking and route planning application built with Sv
 
 - **Express** - Node.js web framework
 - **TypeScript** - Type-safe API development
-- **GTFS Realtime** - Real-time transit data parsing
+- **Translink GTFS Realtime** - Real-time transit data parsing
 - **Google Maps API** - Route planning and directions
+- **Ubuntu VPS with reverse proxy** - Backend container hosting and request routing
 
 ## Project Structure
 
