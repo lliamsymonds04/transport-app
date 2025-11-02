@@ -127,7 +127,7 @@
 				color: color,
 				dashArray: isDotted ? '5, 10' : '',
 				opacity: 0.8,
-				weight: 6,
+				weight: isDotted ? 5 : 6,
 				lineJoin: 'round',
 				lineCap: 'round'
 			}).addTo(map);
