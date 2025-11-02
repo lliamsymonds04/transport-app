@@ -3,6 +3,7 @@
 	import 'leaflet.markercluster/dist/MarkerCluster.css';
 	import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 	import { onDestroy, onMount } from 'svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 	import type { Map as LeafletMap, LatLngTuple, MarkerClusterGroup } from 'leaflet';
 	import polyline from '@mapbox/polyline';
 	import { env } from '$env/dynamic/public';
@@ -27,6 +28,8 @@
 	let clusterGroup: MarkerClusterGroup;
 	let routeClusterGroup: MarkerClusterGroup;
 	let vehicleInfoList: VehicleInfo[] = [];
+	let vehicleMarkers: Map<string, L.Marker> = new Map();
+	let routeVehicleMarkers: Map<string, L.Marker> = new Map();
 
 	let { transitRoutes, initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 	let primaryColor: string = $state('#3388ff');
@@ -146,7 +149,6 @@
 			}
 
 			if (!isDotted) {
-				//addCircleMarker(points[0][0], points[0][1], 8, color); // Start point
 				addCircleMarker(points[points.length - 1][0], points[points.length - 1][1], 8, color); // End point
 			}
 		}
@@ -193,16 +195,42 @@
 				throw new Error('Failed to fetch vehicle locations');
 			}
 
-			vehicleInfoList = await response.json();
+			const newVehicleInfoList: VehicleInfo[] = await response.json();
+			const newVehicleIds = new SvelteSet<string>();
 
-			clearVehicleMarkers();
+			newVehicleInfoList.forEach(async (vehicle) => {
+				const vehicleId = vehicle.id;
+				newVehicleIds.add(vehicleId);
 
-			vehicleInfoList.forEach(async (vehicle) => {
-				const marker = await vehicleMarkerHelper(vehicle);
-				if (marker) {
-					clusterGroup.addLayer(marker);
+				const existingMarker = vehicleMarkers.get(vehicleId);
+				if (!vehicle.latitude || !vehicle.longitude) {
+					// If vehicle has no valid location, remove its marker if it exists
+					if (existingMarker) {
+						clusterGroup.removeLayer(existingMarker);
+						vehicleMarkers.delete(vehicleId);
+					}
+					return;
+				}
+
+				if (existingMarker) {
+					existingMarker.setLatLng([vehicle.latitude, vehicle.longitude]);
+				} else {
+					const marker = await vehicleMarkerHelper(vehicle);
+					if (marker) {
+						clusterGroup.addLayer(marker);
+						vehicleMarkers.set(vehicleId, marker);
+					}
 				}
 			});
+
+			vehicleMarkers.forEach((marker, vehicleId) => {
+				if (!newVehicleIds.has(vehicleId)) {
+					clusterGroup.removeLayer(marker);
+					vehicleMarkers.delete(vehicleId);
+				}
+			});
+
+			vehicleInfoList = newVehicleInfoList;
 			clusterGroup.refreshClusters();
 
 			applyRouteFilter(transitRoutes);

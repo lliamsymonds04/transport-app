@@ -10,12 +10,12 @@ const CACHE_DURATION = 60000; // 1 minute in milliseconds
 function getVehicleType(routeId: string | null): string | null {
 	if (!routeId) return null;
 
-	// Ferry routes (e.g., "F1", "F2", "FCTC")
-	if (routeId.startsWith('F')) return 'Ferry';
-
 	// Train routes with hyphens (e.g., "RWBR-4442", "GOLD-1234")
 	if (routeId.match(/^[A-Z]{2,4}-\d+$/)) return 'Train';
 
+	// Ferry routes (e.g., "F1", "F2", "FCTC")
+	// Do after train check to avoid misclassifying "FCTC-1234" as Ferry
+	if (routeId.startsWith('F')) return 'Ferry';
 	// Bus routes are numeric (e.g., "100", "111", "222")
 	if (routeId.match(/^\d+$/)) return 'Bus';
 

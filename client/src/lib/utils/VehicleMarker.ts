@@ -1,4 +1,3 @@
-//import L from 'leaflet';
 import type { VehicleInfo } from '@shared/vehicleInfo.js';
 
 function getVehicleIconSvg(vehicleType: string | null): string {
