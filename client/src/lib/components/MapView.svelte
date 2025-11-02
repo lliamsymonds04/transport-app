@@ -206,10 +206,7 @@
 				const existingMarker = vehicleMarkers.get(vehicleId);
 				if (!vehicle.latitude || !vehicle.longitude) {
 					// If vehicle has no valid location, remove its marker if it exists
-					if (existingMarker) {
-						clusterGroup.removeLayer(existingMarker);
-						vehicleMarkers.delete(vehicleId);
-					}
+					newVehicleIds.delete(vehicleId);
 					return;
 				}
 
@@ -232,9 +229,13 @@
 			});
 
 			vehicleInfoList = newVehicleInfoList;
-			clusterGroup.refreshClusters();
 
 			applyRouteFilter(transitRoutes);
+
+			clusterGroup.refreshClusters();
+			setTimeout(() => {
+				clusterGroup.refreshClusters();
+			}, animationDuration + 500);
 		} catch {
 			console.error('Error fetching vehicle locations');
 			clearVehicleMarkers();
