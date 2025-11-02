@@ -1,4 +1,5 @@
 import type { VehicleInfo } from '@shared/vehicleInfo.js';
+import type { LatLngTuple } from 'leaflet';
 
 function getVehicleIconSvg(vehicleType: string | null): string {
 	const iconMap: { [key: string]: string } = {
@@ -41,4 +42,29 @@ export async function createVehicleMarker(vehicle: VehicleInfo, size = 40) {
 		iconAnchor: [size / 2, size / 2],
 		className: ''
 	});
+}
+
+export function animateMarker(marker: L.Marker, newLatLng: LatLngTuple, duration = 1000) {
+	const startLatLng = marker.getLatLng();
+	const [startLat, startLng] = [startLatLng.lat, startLatLng.lng];
+	const [endLat, endLng] = [newLatLng[0], newLatLng[1]];
+
+	const startTime = performance.now();
+
+	function animate(time: number) {
+		const t = Math.min((time - startTime) / duration, 1); // progress 0 → 1
+		const easedT = easeInOut(t); // progress 0 → 1 with easing
+		const lat = startLat + (endLat - startLat) * easedT;
+		const lng = startLng + (endLng - startLng) * easedT;
+
+		marker.setLatLng([lat, lng]);
+
+		if (t < 1) requestAnimationFrame(animate);
+	}
+
+	requestAnimationFrame(animate);
+}
+
+function easeInOut(t: number) {
+	return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }

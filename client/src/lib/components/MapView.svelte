@@ -4,12 +4,13 @@
 	import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 	import { onDestroy, onMount } from 'svelte';
 	import { SvelteSet, SvelteMap } from 'svelte/reactivity';
-	import type { Map as LeafletMap, LatLngTuple, MarkerClusterGroup } from 'leaflet';
 	import polyline from '@mapbox/polyline';
 	import { env } from '$env/dynamic/public';
-	import { createVehicleMarker } from '$lib/utils/VehicleMarker.js';
+	import { createVehicleMarker, animateMarker } from '$lib/utils/VehicleMarker.js';
 	import type { VehicleInfo } from '@shared/vehicleInfo.js';
+	import type { Map as LeafletMap, LatLngTuple, MarkerClusterGroup } from 'leaflet';
 	const url = env.PUBLIC_SERVER_API_URL || 'http://localhost:3000';
+	const animationDuration = 1500; // in milliseconds
 
 	interface Props {
 		transitRoutes: string[];
@@ -213,7 +214,7 @@
 				}
 
 				if (existingMarker) {
-					existingMarker.setLatLng([vehicle.latitude, vehicle.longitude]);
+					animateMarker(existingMarker, [vehicle.latitude, vehicle.longitude], animationDuration);
 				} else {
 					const marker = await vehicleMarkerHelper(vehicle);
 					if (marker) {
@@ -288,7 +289,7 @@
 		const filteredIndexes = filterVehiclesByRoute(routeNames);
 
 		if (routeNames.length === 0) {
-			routeClusterGroup.clearLayers();
+			clearRouteMarkers();
 			return;
 		}
 
@@ -307,13 +308,13 @@
 
 			const marker = routeVehicleMarkers.get(vehicleId);
 			if (marker) {
-				if (!vehicle.latitude || !vehicle.longitude || !marker) {
+				if (!vehicle.latitude || !vehicle.longitude) {
 					routeClusterGroup.removeLayer(marker);
 					routeVehicleMarkers.delete(vehicleId);
 					return;
 				}
 
-				marker.setLatLng([vehicle.latitude, vehicle.longitude]);
+				animateMarker(marker, [vehicle.latitude, vehicle.longitude], animationDuration);
 			} else {
 				vehicleMarkerHelper(vehicle).then((newMarker) => {
 					if (newMarker) {
@@ -340,6 +341,7 @@
 	export function clearRouteMarkers() {
 		if (!routeClusterGroup) return;
 		routeClusterGroup.clearLayers();
+		routeVehicleMarkers.clear();
 	}
 
 	onDestroy(() => {
