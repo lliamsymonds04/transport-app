@@ -28,6 +28,7 @@
 			mapComponent.showClusterGroup();
 			mapComponent.clearPolylines();
 			mapComponent.clearMarkers();
+			mapComponent.clearRouteMarkers();
 		}
 	});
 

@@ -3,7 +3,7 @@
 	import 'leaflet.markercluster/dist/MarkerCluster.css';
 	import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 	import { onDestroy, onMount } from 'svelte';
-	import { SvelteSet } from 'svelte/reactivity';
+	import { SvelteSet, SvelteMap } from 'svelte/reactivity';
 	import type { Map as LeafletMap, LatLngTuple, MarkerClusterGroup } from 'leaflet';
 	import polyline from '@mapbox/polyline';
 	import { env } from '$env/dynamic/public';
@@ -28,8 +28,8 @@
 	let clusterGroup: MarkerClusterGroup;
 	let routeClusterGroup: MarkerClusterGroup;
 	let vehicleInfoList: VehicleInfo[] = [];
-	let vehicleMarkers: Map<string, L.Marker> = new Map();
-	let routeVehicleMarkers: Map<string, L.Marker> = new Map();
+	let vehicleMarkers = new SvelteMap<string, L.Marker>();
+	let routeVehicleMarkers = new SvelteMap<string, L.Marker>();
 
 	let { transitRoutes, initialCenter = [0, 0], initialZoom = 15, onMapReady }: Props = $props();
 	let primaryColor: string = $state('#3388ff');
@@ -286,14 +286,42 @@
 	function applyRouteFilter(routeNames: string[]) {
 		if (!map) return;
 		const filteredIndexes = filterVehiclesByRoute(routeNames);
-		routeClusterGroup.clearLayers();
+
+		if (routeNames.length === 0) {
+			routeClusterGroup.clearLayers();
+			return;
+		}
+
+		const filteredIds = filteredIndexes.map((index) => vehicleInfoList[index].id);
+
+		routeVehicleMarkers.forEach((marker, vehicleId) => {
+			if (!filteredIds.includes(vehicleId)) {
+				routeClusterGroup.removeLayer(marker);
+				routeVehicleMarkers.delete(vehicleId);
+			}
+		});
 
 		filteredIndexes.forEach((index) => {
-			vehicleMarkerHelper(vehicleInfoList[index]).then((marker) => {
-				if (marker) {
-					routeClusterGroup.addLayer(marker);
+			const vehicle = vehicleInfoList[index];
+			const vehicleId = vehicle.id;
+
+			const marker = routeVehicleMarkers.get(vehicleId);
+			if (marker) {
+				if (!vehicle.latitude || !vehicle.longitude || !marker) {
+					routeClusterGroup.removeLayer(marker);
+					routeVehicleMarkers.delete(vehicleId);
+					return;
 				}
-			});
+
+				marker.setLatLng([vehicle.latitude, vehicle.longitude]);
+			} else {
+				vehicleMarkerHelper(vehicle).then((newMarker) => {
+					if (newMarker) {
+						routeClusterGroup.addLayer(newMarker);
+						routeVehicleMarkers.set(vehicleId, newMarker);
+					}
+				});
+			}
 		});
 
 		routeClusterGroup.refreshClusters();
@@ -307,6 +335,11 @@
 	export function showClusterGroup() {
 		if (!map) return;
 		map.addLayer(clusterGroup);
+	}
+
+	export function clearRouteMarkers() {
+		if (!routeClusterGroup) return;
+		routeClusterGroup.clearLayers();
 	}
 
 	onDestroy(() => {
