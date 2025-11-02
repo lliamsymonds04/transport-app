@@ -1,6 +1,6 @@
 # Transport App
 
-A real-time public transit tracking and route planning application built with SvelteKit and Express. Track live vehicle locations, plan multi-modal journeys, and visualize routes on an interactive map.
+A real-time public transit tracking and route planning application for South-East Queensland built with SvelteKit and Express. Track live vehicle locations, plan multi-modal journeys, and visualize routes on an interactive map.
 
 [![Screenshot](assets/website-screenshot.png)](https://bne-transport.vercel.app/)
 
